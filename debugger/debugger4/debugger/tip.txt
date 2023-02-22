@@ -1,0 +1,6 @@
+01001FA6  |> \393D 48510001 cmp     dword ptr [1005148], edi         ;  Case 201 (WM_LBUTTONDOWN) of switch 01001F5F
+01001FAC  |.^ 75 D6         jnz     short 01001F84
+01001FAE  |.  FF75 14       push    dword ptr [ebp+14]
+01001FB1  |.  E8 56F4FFFF   call    0100140C
+01001FB6  |.  85C0          test    eax, eax
+

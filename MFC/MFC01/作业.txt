@@ -1,0 +1,15 @@
+创建对话框的工程，定位对话框的SDK API调用位置
+ 创建 
+ CreateDlgIndirect
+           CreateDialogIndirect
+ 消息循环
+ pThread->InitInstance()
+      dlg.DoModal()
+	CreateRunDlgIndirect
+		RunModalLoop
+			AfxPumpMessage
+				PumpMessage
+					AfxInternalPumpMessage
+						GetMessage
+ 过程函数
+ AfxWndProc(HWND hWnd, UINT nMsg, WPARAM wParam, LPARAM lParam)

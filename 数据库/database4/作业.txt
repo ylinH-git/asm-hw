@@ -1,0 +1,108 @@
+#创建表
+create table employee(
+id int not null unique auto_increment,
+emp_name varchar(20) not null,
+sex enum('male','female') not null default 'male', #⼤部分是男的
+age int(3) unsigned not null default 28,
+hire_date date not null,
+post varchar(50),
+post_comment varchar(100),
+salary double(15,2),
+office int, #⼀个部⻔⼀个屋⼦
+depart_id int
+);
+#插⼊记录
+#三个部⻔：教学，销售，运营
+insert into employee(emp_name,sex,age,hire_date,post,salary,office,depart_id) values
+('egon','male',18,'20170301','⽼男孩驻沙河办事处外交⼤使',7300.33,401,1), #以下是教学部
+('alex','male',78,'20150302','teacher',1000000.31,401,1),
+('wupeiqi','male',81,'20130305','teacher',8300,401,1),
+('yuanhao','male',73,'20140701','teacher',3500,401,1),
+('liwenzhou','male',28,'20121101','teacher',2100,401,1),
+('jingliyang','female',18,'20110211','teacher',9000,401,1),
+('jinxin','male',18,'19000301','teacher',30000,401,1),
+('成⻰','male',48,'20101111','teacher',10000,401,1),
+('歪歪','female',48,'20150311','sale',3000.13,402,2),#以下是销售部⻔
+('丫丫','female',38,'20101101','sale',2000.35,402,2),
+('丁丁','female',18,'20110312','sale',1000.37,402,2),
+('星星','female',18,'20160513','sale',3000.29,402,2),
+('格格','female',28,'20170127','sale',4000.33,402,2),
+('张野','male',28,'20160311','operation',10000.13,403,3), #以下是运营部⻔
+('程咬⾦','male',18,'19970312','operation',20000,403,3),
+('程咬银','female',18,'20130311','operation',19000,403,3),
+('程咬铜','male',18,'20150411','operation',18000,403,3),
+('程咬铁','female',18,'20140512','operation',17000,403,3)
+;
+
+# 查出所有员⼯的名字，薪资,格式为<名字:egon> <薪资:3000>
+SELECT emp_name AS 名字, salary AS 薪资 FROM employee;
+
+# 查出所有的岗位（去掉重复）
+SELECT DISTINCT post FROM employee;
+
+# 查出所有员工名字，以及他们的年薪,年薪的字段名为annual_year
+SELECT emp_name AS 名字, salary * 12 AS annual_year FROM employee;
+
+# 查看岗位是teacher的员工姓名、年龄
+SELECT emp_name AS 名字, age AS 年龄 FROM employee WHERE post = 'teacher';
+
+# 查看岗位是teacher且年龄大于30岁的员工姓名、年龄
+SELECT emp_name AS 名字, age AS 年龄 FROM employee WHERE post = 'teacher' AND age > 30;
+
+# 查看岗位是teacher且薪资在9000-10000范围内的员工姓名、年龄、薪资
+SELECT emp_name AS 名字, age AS 年龄, salary AS 薪资 FROM employee WHERE post = 'teacher' AND salary BETWEEN 9000 AND 10000;
+
+# 查看岗位描述不为NULL的员工信息
+SELECT * FROM employee WHERE post_comment IS NOT NULL;
+
+# 查看岗位是teacher且薪资是10000或9000或30000的员工姓名、年龄、薪资
+SELECT emp_name AS 名字, age AS 年龄, salary AS 薪资 FROM employee WHERE post = 'teacher' AND salary IN(9000, 10000, 30000);
+
+# 查看岗位是teacher且薪资不是10000或9000或30000的员工姓名、年龄、薪资
+SELECT emp_name AS 名字, age AS 年龄, salary AS 薪资 FROM employee WHERE post = 'teacher' AND salary NOT IN(9000, 10000, 30000);
+
+# 查看岗位是teacher且名字是jin开头的员工姓名、年薪
+SELECT emp_name AS 名字, salary * 12 AS 年薪 FROM employee WHERE post = 'teacher' AND emp_name LIKE "jin%";
+
+# 查询岗位名以及岗位包含的所有员工名字
+SELECT post AS 岗位名, GROUP_CONCAT(emp_name) FROM employee GROUP BY post;
+
+# 查询岗位名以及各岗位内包含的员工个数
+SELECT post AS 岗位名, COUNT(*) AS 员工个数 FROM employee GROUP BY post;
+
+# 查询公司内男员工和女员工的个数
+SELECT sex AS 性别, COUNT(*) AS 员工个数 FROM employee GROUP BY sex;
+
+# 查询岗位名以及各岗位的平均薪资
+SELECT post AS 岗位名, AVG(salary) AS 平均薪资 FROM employee GROUP BY post;
+
+# 查询岗位名以及各岗位的最高薪资
+SELECT post AS 岗位名, MAX(salary) AS 最高薪资 FROM employee GROUP BY post;
+
+# 查询岗位名以及各岗位的最低薪资
+SELECT post AS 岗位名, MIN(salary) AS 最低薪资 FROM employee GROUP BY post;
+
+# 查询男员工与男员工的平均薪资，女员工与女员工的平均薪资
+SELECT sex AS 性别, AVG(salary) AS 平均薪资  FROM employee GROUP BY sex;
+
+# 查询各岗位内包含的员工个数小于2的岗位名、岗位内包含员工名字、个数
+SELECT post AS 岗位名, GROUP_CONCAT(emp_name) AS 名字, COUNT(*) AS 个数 FROM employee GROUP BY post HAVING  COUNT(*) < 2;
+
+
+# 查询各岗位平均薪资大于10000的岗位名、平均薪资
+SELECT post AS 岗位名, AVG(salary) AS 平均薪资 FROM employee GROUP BY post HAVING  AVG(salary) > 10000;
+
+# 查询各岗位平均薪资大于10000且小于20000的岗位名、平均薪资
+SELECT post AS 岗位名, AVG(salary) AS 平均薪资 FROM employee GROUP BY post HAVING  AVG(salary) BETWEEN 10000 AND 20000;
+
+# 查询所有员工信息，先按照age升序排序，如果age相同则按照hire_date降序排序
+SELECT * FROM employee ORDER BY age ASC, hire_date DESC;
+
+# 查询各岗位平均薪资大于10000的岗位名、平均薪资,结果按平均薪资升序排列
+SELECT post AS 岗位名, AVG(salary) AS 平均薪资 FROM employee GROUP BY post HAVING  AVG(salary) > 10000 ORDER BY 平均薪资;
+
+# 查询各岗位平均薪资大于10000的岗位名、平均薪资,结果按平均薪资降序排列
+SELECT post AS 岗位名, AVG(salary) AS 平均薪资 FROM employee GROUP BY post HAVING  AVG(salary) > 10000 ORDER BY 平均薪资 DESC;
+
+# 分页显示，每页5条
+SELECT * FROM employee limit 0, 5;

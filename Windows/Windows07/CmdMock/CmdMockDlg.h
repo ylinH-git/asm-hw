@@ -1,0 +1,45 @@
+﻿
+// CmdMockDlg.h: 头文件
+//
+
+#pragma once
+
+
+// CCmdMockDlg 对话框
+class CCmdMockDlg : public CDialogEx
+{
+// 构造
+public:
+	CCmdMockDlg(CWnd* pParent = nullptr);	// 标准构造函数
+
+// 对话框数据
+#ifdef AFX_DESIGN_TIME
+	enum { IDD = IDD_CMDMOCK_DIALOG };
+#endif
+
+	protected:
+	virtual void DoDataExchange(CDataExchange* pDX);	// DDX/DDV 支持
+
+
+// 实现
+protected:
+	HICON m_hIcon;
+
+	// 生成的消息映射函数
+	virtual BOOL OnInitDialog();
+	afx_msg void OnSysCommand(UINT nID, LPARAM lParam);
+	afx_msg void OnPaint();
+	afx_msg HCURSOR OnQueryDragIcon();
+	DECLARE_MESSAGE_MAP()
+public:
+	afx_msg void OnBnClickedRun();
+private:
+	HANDLE m_hChildRead = INVALID_HANDLE_VALUE;
+	HANDLE m_hChildWrite = INVALID_HANDLE_VALUE;
+	HANDLE m_hParentRead = INVALID_HANDLE_VALUE;
+	HANDLE m_hParentWrite = INVALID_HANDLE_VALUE;
+	int m_runTimer = 0;
+public:
+	afx_msg void OnTimer(UINT_PTR nIDEvent);
+	CEdit m_resultEdit;
+};

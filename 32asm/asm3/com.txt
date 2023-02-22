@@ -1,0 +1,283 @@
+00408F75   .  85C0          test    eax, eax
+
+
+
+00408F00   .  83EC 08       sub     esp, 8
+00408F03   .  53            push    ebx
+00408F04   .  56            push    esi
+00408F05   .  8BF1          mov     esi, ecx
+00408F07   .  68 FF000000   push    0FF
+00408F0C   .  68 68994600   push    00469968                         ;  unregistered u
+00408F11   .  8D8E A8040000 lea     ecx, dword ptr [esi+4A8]
+00408F17   .  E8 9F990200   call    004328BB
+00408F1C   .  68 FF000000   push    0FF
+00408F21   .  68 689A4600   push    00469A68                         ;  unregistered user
+00408F26   .  8D8E 6C040000 lea     ecx, dword ptr [esi+46C]
+00408F2C   .  E8 8A990200   call    004328BB
+00408F31   .  68 68994600   push    00469968                         ;  unregistered u
+00408F36   .  8D4C24 0C     lea     ecx, dword ptr [esp+C]
+00408F3A   .  E8 12600200   call    0042EF51
+00408F3F   .  8B00          mov     eax, dword ptr [eax]
+00408F41   .  68 98414600   push    00464198                         ;  unregistered user
+00408F46   .  50            push    eax
+00408F47   .  E8 33330100   call    0041C27F
+00408F4C   .  83C4 08       add     esp, 8
+00408F4F   .  8D4C24 08     lea     ecx, dword ptr [esp+8]
+00408F53   .  85C0          test    eax, eax
+00408F55   .  0F94C3        sete    bl
+00408F58   .  E8 865F0200   call    0042EEE3
+00408F5D   .  84DB          test    bl, bl
+00408F5F   .  74 0F         je      short 00408F70
+00408F61   .  6A 01         push    1
+00408F63   .  8BCE          mov     ecx, esi
+00408F65   .  E8 93A70200   call    004336FD
+00408F6A   .  5E            pop     esi
+00408F6B   .  5B            pop     ebx
+00408F6C   .  83C4 08       add     esp, 8
+00408F6F   .  C3            retn
+00408F70   >  E8 1BFCFFFF   call    00408B90
+00408F75   .  85C0          test    eax, eax
+00408F77   .  0F84 AB000000 je      00409028
+
+
+
+0041C27F  /$  55            push    ebp
+0041C280  |.  8BEC          mov     ebp, esp
+0041C282  |.  833D 3CD34600>cmp     dword ptr [46D33C], 0
+0041C289  |.  53            push    ebx
+0041C28A  |.  56            push    esi
+0041C28B  |.  57            push    edi
+0041C28C  |.  75 12         jnz     short 0041C2A0
+0041C28E  |.  FF75 0C       push    dword ptr [ebp+C]
+0041C291  |.  FF75 08       push    dword ptr [ebp+8]
+0041C294  |.  E8 D7680000   call    00422B70
+0041C299  |.  59            pop     ecx
+0041C29A  |.  59            pop     ecx
+0041C29B  |.  E9 89000000   jmp     0041C329
+0041C2A0  |>  6A 19         push    19
+0041C2A2  |.  E8 5F5A0000   call    00421D06
+0041C2A7  |.  8B75 0C       mov     esi, dword ptr [ebp+C]
+0041C2AA  |.  8B7D 08       mov     edi, dword ptr [ebp+8]
+0041C2AD  |.  59            pop     ecx
+0041C2AE  |>  66:0FB60F     /movzx   cx, byte ptr [edi]
+0041C2B2  |.  0FB6C1        |movzx   eax, cl
+0041C2B5  |.  47            |inc     edi
+0041C2B6  |.  894D 0C       |mov     dword ptr [ebp+C], ecx
+0041C2B9  |.  F680 41D44600>|test    byte ptr [eax+46D441], 4
+0041C2C0  |.  74 16         |je      short 0041C2D8
+0041C2C2  |.  8A07          |mov     al, byte ptr [edi]
+0041C2C4  |.  84C0          |test    al, al
+0041C2C6  |.  75 06         |jnz     short 0041C2CE
+0041C2C8  |.  8365 0C 00    |and     dword ptr [ebp+C], 0
+0041C2CC  |.  EB 0A         |jmp     short 0041C2D8
+0041C2CE  |>  33D2          |xor     edx, edx
+0041C2D0  |.  47            |inc     edi
+0041C2D1  |.  8AF1          |mov     dh, cl
+0041C2D3  |.  8AD0          |mov     dl, al
+0041C2D5  |.  8955 0C       |mov     dword ptr [ebp+C], edx
+0041C2D8  |>  66:0FB61E     |movzx   bx, byte ptr [esi]
+0041C2DC  |.  0FB6C3        |movzx   eax, bl
+0041C2DF  |.  46            |inc     esi
+0041C2E0  |.  F680 41D44600>|test    byte ptr [eax+46D441], 4
+0041C2E7  |.  74 13         |je      short 0041C2FC
+0041C2E9  |.  8A06          |mov     al, byte ptr [esi]
+0041C2EB  |.  84C0          |test    al, al
+0041C2ED  |.  75 04         |jnz     short 0041C2F3
+0041C2EF  |.  33DB          |xor     ebx, ebx
+0041C2F1  |.  EB 09         |jmp     short 0041C2FC
+0041C2F3  |>  33C9          |xor     ecx, ecx
+0041C2F5  |.  46            |inc     esi
+0041C2F6  |.  8AEB          |mov     ch, bl
+0041C2F8  |.  8AC8          |mov     cl, al
+0041C2FA  |.  8BD9          |mov     ebx, ecx
+0041C2FC  |>  66:395D 0C    |cmp     word ptr [ebp+C], bx
+0041C300  |.  75 09         |jnz     short 0041C30B
+0041C302  |.  66:837D 0C 00 |cmp     word ptr [ebp+C], 0
+0041C307  |.  74 16         |je      short 0041C31F
+0041C309  |.^ EB A3         \jmp     short 0041C2AE
+0041C30B  |>  6A 19         push    19
+0041C30D  |.  E8 555A0000   call    00421D67
+0041C312  |.  66:3B5D 0C    cmp     bx, word ptr [ebp+C]
+0041C316  |.  59            pop     ecx
+0041C317  |.  1BC0          sbb     eax, eax
+0041C319  |.  83E0 02       and     eax, 2
+0041C31C  |.  48            dec     eax
+0041C31D  |.  EB 0A         jmp     short 0041C329
+0041C31F  |>  6A 19         push    19
+0041C321  |.  E8 415A0000   call    00421D67
+0041C326  |.  59            pop     ecx
+0041C327  |.  33C0          xor     eax, eax
+0041C329  |>  5F            pop     edi
+0041C32A  |.  5E            pop     esi
+0041C32B  |.  5B            pop     ebx
+0041C32C  |.  5D            pop     ebp
+0041C32D  \.  C3            retn
+
+
+// 种子数
+0019EEC0                                      8C 17 43 00              .
+
+
+
+
+// userid
+0042EF51  /$  A1 5C5D4600   mov     eax, dword ptr [465D5C]
+0042EF56  |.  53            push    ebx
+0042EF57  |.  8B5C24 08     mov     ebx, dword ptr [esp+8]
+0042EF5B  |.  56            push    esi
+0042EF5C  |.  8BF1          mov     esi, ecx
+0042EF5E  |.  57            push    edi
+0042EF5F  |.  85DB          test    ebx, ebx
+0042EF61  |.  8906          mov     dword ptr [esi], eax
+0042EF63  |.  74 36         je      short 0042EF9B
+0042EF65  |.  8BC3          mov     eax, ebx
+0042EF67  |.  C1E8 10       shr     eax, 10
+0042EF6A  |.  66:85C0       test    ax, ax
+0042EF6D  |.  75 0B         jnz     short 0042EF7A
+0042EF6F  |.  0FB7C3        movzx   eax, bx
+0042EF72  |.  50            push    eax
+0042EF73  |.  E8 18630000   call    00435290
+0042EF78  |.  EB 21         jmp     short 0042EF9B
+0042EF7A  |>  53            push    ebx                              ; /String
+0042EF7B  |.  FF15 D8014500 call    dword ptr [<&KERNEL32.lstrlenA>] ; \lstrlenA
+0042EF81  |.  8BF8          mov     edi, eax
+0042EF83  |.  85FF          test    edi, edi
+0042EF85  |.  74 14         je      short 0042EF9B
+0042EF87  |.  57            push    edi
+0042EF88  |.  8BCE          mov     ecx, esi
+0042EF8A  |.  E8 C1FDFFFF   call    0042ED50
+0042EF8F  |.  57            push    edi
+0042EF90  |.  53            push    ebx
+0042EF91  |.  FF36          push    dword ptr [esi]
+0042EF93  |.  E8 68D9FEFF   call    0041C900
+0042EF98  |.  83C4 0C       add     esp, 0C
+0042EF9B  |>  8BC6          mov     eax, esi
+0042EF9D  |.  5F            pop     edi
+0042EF9E  |.  5E            pop     esi
+0042EF9F  |.  5B            pop     ebx
+0042EFA0  \.  C2 0400       retn    4
+
+
+
+
+
+
+
+
+【463e48】“0123456789”
+“6769-”种子
+
+00408B90  /$  6A FF         push    -1
+00408B92  |.  68 98B64400   push    0044B698                         ;  SE 处理程序安装
+00408B97  |.  64:A1 0000000>mov     eax, dword ptr fs:[0]
+00408B9D  |.  50            push    eax
+00408B9E  |.  64:8925 00000>mov     dword ptr fs:[0], esp
+00408BA5  |.  83EC 08       sub     esp, 8
+00408BA8  |.  57            push    edi
+;算字符串长度
+00408BA9  |.  BF 68994600   mov     edi, 00469968                    ;  ASCII "qweqwe"
+00408BAE  |.  83C9 FF       or      ecx, FFFFFFFF
+00408BB1  |.  33C0          xor     eax, eax
+00408BB3  |.  F2:AE         repne   scas byte ptr es:[edi]
+00408BB5  |.  F7D1          not     ecx
+00408BB7  |.  49            dec     ecx
+字符串长度要求大于8
+00408BB8  |.  83F9 08       cmp     ecx, 8
+存长度到局部变量里面
+00408BBB  |.  894C24 08     mov     dword ptr [esp+8], ecx
+00408BBF  |.  7D 10         jge     short 00408BD1
+00408BC1  |.  5F            pop     edi
+00408BC2  |.  8B4C24 08     mov     ecx, dword ptr [esp+8]
+00408BC6  |.  64:890D 00000>mov     dword ptr fs:[0], ecx
+00408BCD  |.  83C4 14       add     esp, 14
+00408BD0  |.  C3            retn
+00408BD1  |>  53            push    ebx
+00408BD2  |.  55            push    ebp
+00408BD3  |.  56            push    esi
+00408BD4  |.  68 68994600   push    00469968                         ;  ASCII "qweqwe"
+00408BD9  |.  E8 34300200   call    0042BC12
+00408BDE  |.  83C4 04       add     esp, 4
+00408BE1  |.  8D4C24 10     lea     ecx, dword ptr [esp+10]
+00408BE5  |.  68 FC404600   push    004640FC                         ;  ASCII "6769-"
+00408BEA  |.  E8 62630200   call    0042EF51
+00408BEF  |.  33F6          xor     esi, esi
+00408BF1  |.  897424 20     mov     dword ptr [esp+20], esi
+00408BF5  |>  8B2D 483E4600 /mov     ebp, dword ptr [463E48]         ;  comexp.00463E74
+00408BFB  |.  83C9 FF       |or      ecx, FFFFFFFF
+00408BFE  |.  8BFD          |mov     edi, ebp
+00408C00  |.  33C0          |xor     eax, eax
+00408C02  |.  F2:AE         |repne   scas byte ptr es:[edi]
+00408C04  |.  F7D1          |not     ecx
+00408C06  |.  49            |dec     ecx
+00408C07  |.  8BC6          |mov     eax, esi
+00408C09  |.  33D2          |xor     edx, edx
+00408C0B  |.  8BFD          |mov     edi, ebp
+00408C0D  |.  F7F1          |div     ecx
+00408C0F  |.  8B4C24 14     |mov     ecx, dword ptr [esp+14]
+00408C13  |.  8BC6          |mov     eax, esi
+00408C15  |.  0FBE1C2A      |movsx   ebx, byte ptr [edx+ebp]
+00408C19  |.  33D2          |xor     edx, edx
+00408C1B  |.  F7F1          |div     ecx
+00408C1D  |.  0FBE82 689946>|movsx   eax, byte ptr [edx+469968]
+00408C24  |.  8D1440        |lea     edx, dword ptr [eax+eax*2]
+00408C27  |.  8D0490        |lea     eax, dword ptr [eax+edx*4]
+00408C2A  |.  8BD6          |mov     edx, esi
+00408C2C  |.  0FAFD6        |imul    edx, esi
+00408C2F  |.  0FAFD6        |imul    edx, esi
+00408C32  |.  0FAFD1        |imul    edx, ecx
+00408C35  |.  03D8          |add     ebx, eax
+00408C37  |.  83C9 FF       |or      ecx, FFFFFFFF
+00408C3A  |.  33C0          |xor     eax, eax
+00408C3C  |.  03DA          |add     ebx, edx
+00408C3E  |.  F2:AE         |repne   scas byte ptr es:[edi]
+00408C40  |.  F7D1          |not     ecx
+00408C42  |.  49            |dec     ecx
+00408C43  |.  8BC3          |mov     eax, ebx
+00408C45  |.  33D2          |xor     edx, edx
+00408C47  |.  F7F1          |div     ecx
+00408C49  |.  8D4C24 10     |lea     ecx, dword ptr [esp+10]
+00408C4D  |.  8A042A        |mov     al, byte ptr [edx+ebp]
+00408C50  |.  50            |push    eax
+// 往6769-7后面拼东西
+00408C51  |.  E8 44660200   |call    0042F29A
+00408C56  |.  85F6          |test    esi, esi
+00408C58  |.  74 1D         |je      short 00408C77
+00408C5A  |.  8BC6          |mov     eax, esi
+00408C5C  |.  33D2          |xor     edx, edx
+00408C5E  |.  B9 03000000   |mov     ecx, 3
+00408C63  |.  F7F1          |div     ecx
+00408C65  |.  85D2          |test    edx, edx
+00408C67  |.  75 0E         |jnz     short 00408C77
+00408C69  |.  68 F8404600   |push    004640F8
+00408C6E  |.  8D4C24 14     |lea     ecx, dword ptr [esp+14]
+00408C72  |.  E8 FC650200   |call    0042F273
+00408C77  |>  46            |inc     esi
+00408C78  |.  83FE 09       |cmp     esi, 9
+00408C7B  |.^ 0F82 74FFFFFF \jb      00408BF5
+00408C81  |.  8B5424 10     mov     edx, dword ptr [esp+10]
+00408C85  |.  68 689A4600   push    00469A68                         ;  ASCII "1231231234"
+00408C8A  |.  52            push    edx
+00408C8B  |.  E8 EF350100   call    0041C27F
+00408C90  |.  83C4 08       add     esp, 8
+00408C93  |.  8D4C24 10     lea     ecx, dword ptr [esp+10]
+00408C97  |.  85C0          test    eax, eax
+00408C99  |.  0F94C0        sete    al
+00408C9C  |.  25 FF000000   and     eax, 0FF
+00408CA1  |.  C74424 20 FFF>mov     dword ptr [esp+20], -1
+00408CA9  |.  8BF0          mov     esi, eax
+00408CAB  |.  E8 33620200   call    0042EEE3
+00408CB0  |.  8B4C24 18     mov     ecx, dword ptr [esp+18]
+00408CB4  |.  8BC6          mov     eax, esi
+00408CB6  |.  5E            pop     esi
+00408CB7  |.  5D            pop     ebp
+00408CB8  |.  5B            pop     ebx
+00408CB9  |.  5F            pop     edi
+00408CBA  |.  64:890D 00000>mov     dword ptr fs:[0], ecx
+00408CC1  |.  83C4 14       add     esp, 14
+00408CC4  \.  C3            retn
+
+
+
+esp+14 == 9
+
+

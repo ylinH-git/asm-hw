@@ -1,0 +1,42 @@
+767DA8D0 >  8BFF            mov     edi, edi
+767DA8D2    55              push    ebp
+767DA8D3    8BEC            mov     ebp, esp
+
+
+767DA8E7   /75 04           jnz     short 767DA8ED
+767DA8E9   |33C0            xor     eax, eax
+767DA8EB   |EB 48           jmp     short 767DA935
+767DA8ED   \56              push    esi
+
+
+7679961A    8D85 60FFFFFF   lea     eax, dword ptr [ebp-A0]
+76799620    50              push    eax
+76799621    FF15 68B18176   call    dword ptr [<&GDI32.CreateFontInd>; gdi32.CreateFontIndirectW
+
+76817EB0    CB              retf
+76817EB1    CE              into
+76817EB2    CC              int3
+76817EB3    E5 00           in      eax, 0
+
+call    004011D6  sendmessage
+
+
+
+
+77757EB7    68 947E7577     push    77757E94
+77757EBC    FF15 68B17577   call    dword ptr [<&GDI32.CreateFontInd>; gdi32.CreateFontIndirectW
+77757EC2    6A 01           push    1
+77757EC4    8BD0            mov     edx, eax
+77757EC6    50              push    eax
+77757EC7    6A 30           push    30
+77757EC9    FF76 0C         push    dword ptr [esi+C]
+77757ECC    E8 0593CA88     call    <jmp.&USER32.SendMessageA>
+77757ED1  - 0F85 162A08FF   jnz     767DA8ED
+
+
+004010CB    6A 00          push    0
+
+0040122B    68 06124000    push    00401206
+
+
+

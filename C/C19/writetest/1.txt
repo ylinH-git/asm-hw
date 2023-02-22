@@ -1,0 +1,34 @@
+printftostream.exe
+T8T8T8
+ALLUSERSPROFILE=C:\Documents and Settings\All Users
+APPDATA=C:\Documents and Settings\Administrator\Application Data
+CLIENTNAME=Console
+CommonProgramFiles=C:\Program Files\Common Files
+COMPUTERNAME=WORLD-D1F7B1203
+ComSpec=C:\WINDOWS\system32\cmd.exe
+FP_NO_HOST_CHECK=NO
+HOMEDRIVE=C:
+HOMEPATH=\Documents and Settings\Administrator
+include=C:\Program Files\Microsoft Visual Studio\VC98\atl\include;C:\Program Files\Microsoft Visual Studio\VC98\mfc\include;C:\Program Files\Microsoft Visual Studio\VC98\include
+lib=C:\Program Files\Microsoft Visual Studio\VC98\mfc\lib;C:\Program Files\Microsoft Visual Studio\VC98\lib
+LOGONSERVER=\\WORLD-D1F7B1203
+MSDevDir=C:\Program Files\Microsoft Visual Studio\Common\MSDev98
+NUMBER_OF_PROCESSORS=2
+OS=Windows_NT
+Path=C:\WINDOWS\system32;C:\WINDOWS;C:\WINDOWS\System32\Wbem;C:\Program Files\Microsoft Visual Studio\Common\Tools\WinNT;C:\Program Files\Microsoft Visual Studio\Common\MSDev98\Bin;C:\Program Files\Microsoft Visual Studio\Common\Tools;C:\Program Files\Microsoft Visual Studio\VC98\bin;C:\Program Files\Internet Explorer
+PATHEXT=.COM;.EXE;.BAT;.CMD;.VBS;.VBE;.JS;.JSE;.WSF;.WSH
+PROCESSOR_ARCHITECTURE=x86
+PROCESSOR_IDENTIFIER=x86 Family 6 Model 142 Stepping 10, GenuineIntel
+PROCESSOR_LEVEL=6
+PROCESSOR_REVISION=8e0a
+ProgramFiles=C:\Program Files
+PROMPT=$P$G
+SESSIONNAME=Console
+SystemDrive=C:
+SystemRoot=C:\WINDOWS
+TEMP=C:\DOCUME~1\ADMINI~1\LOCALS~1\Temp
+TMP=C:\DOCUME~1\ADMINI~1\LOCALS~1\Temp
+USERDOMAIN=WORLD-D1F7B1203
+USERNAME=Administrator
+USERPROFILE=C:\Documents and Settings\Administrator
+windir=C:\WINDOWS

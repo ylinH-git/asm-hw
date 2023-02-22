@@ -1,0 +1,26 @@
+Exception: Access Violation (code 0xc0000005) at address 7BEF5145 in thread 8A0C
+Module: GameHelpDll.dll
+Logical Address: 0002:00004145
+
+18FDFF74 7BEF5145 ThreadProc+A5 [D:\51asm\homework\projects\plantsvszombies\GameHelpDll\dllmain.cpp(25)+0x00000003]
+Params: 00000000 76567D50 18FDFFDC 77B7BB9B
+
+
+EAX:00000AE0 EBX:00000000 ECX:00000000 EDX:009F0000 ESI:18FDFE14 EDI:18FDFF74
+EIP:7BEF5145 ESP:18FDFE14  EBP:18FDFF74
+CS:0023 SS:002B DS:002B ES:002B FS:0053 GS:002B
+Flags:00010202
+
+Windows Ver: NT 6.2  Build 9200
+DDraw Ver: 
+DSound Ver: 
+
+Product: PlantsVsZombies
+Version: 1.0.0.1051
+Time Loaded: 00:00:22
+Fullscreen: ·ñ
+Primary ThreadId: 3F54
+Times Played: 0
+Build Num: 0
+Build Date: 
+

@@ -1,0 +1,192 @@
+// Microsoft Visual C++ generated resource script.
+//
+#include "resource.h"
+
+#define APSTUDIO_READONLY_SYMBOLS
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 2 resource.
+//
+#include "winres.h"
+
+/////////////////////////////////////////////////////////////////////////////
+#undef APSTUDIO_READONLY_SYMBOLS
+
+/////////////////////////////////////////////////////////////////////////////
+// 中文(简体，中国) resources
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_CHS)
+LANGUAGE LANG_CHINESE, SUBLANG_CHINESE_SIMPLIFIED
+#pragma code_page(936)
+
+#ifdef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// TEXTINCLUDE
+//
+
+1 TEXTINCLUDE 
+BEGIN
+    "resource.h\0"
+END
+
+2 TEXTINCLUDE 
+BEGIN
+    "#include ""winres.h""\r\n"
+    "\0"
+END
+
+3 TEXTINCLUDE 
+BEGIN
+    "\r\n"
+    "\0"
+END
+
+#endif    // APSTUDIO_INVOKED
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Dialog
+//
+
+DLG_MAIN DIALOGEX 0, 0, 310, 177
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "地址簿"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    PUSHBUTTON      "修改联络人",BTN_MODCONTACT,107,79,96,18
+    PUSHBUTTON      "查看联络人",BTN_VIEWCONTACT,107,121,96,18
+    PUSHBUTTON      "增加联络人",BTN_ADDCONTACT,107,37,96,18
+END
+
+DLG_ADDCONTACT DIALOGEX 0, 0, 247, 123
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "增加联络人"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    DEFPUSHBUTTON   "确定",BTN_ADDCONFIRM,173,97,50,14
+    EDITTEXT        ED_NAME,73,23,119,14,ES_AUTOHSCROLL
+    EDITTEXT        ED_TEL,73,45,119,14,ES_AUTOHSCROLL
+    LTEXT           "姓名",IDC_STATIC,23,25,18,8
+    LTEXT           "电话",IDC_STATIC,23,48,18,8
+    LTEXT           "性别",IDC_STATIC,23,68,18,8
+    CONTROL         "男",RD_MALE,"Button",BS_AUTORADIOBUTTON | WS_GROUP,74,67,25,10
+    CONTROL         "女",RD_FEMALE,"Button",BS_AUTORADIOBUTTON,110,67,25,10
+    CONTROL         "未知",RD_UNKNOW,"Button",BS_AUTORADIOBUTTON,146,67,33,10
+END
+
+DLG_SHOWCONTACT DIALOGEX 0, 0, 311, 160
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "联络人列表"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    DEFPUSHBUTTON   "搜索",BTN_SEARCH,171,19,50,14
+    EDITTEXT        ED_SEARCH,27,19,130,14,ES_AUTOHSCROLL
+    CONTROL         "",LT_MEMBER,"SysListView32",LVS_REPORT | LVS_ALIGNLEFT | WS_BORDER | WS_TABSTOP,27,46,259,97
+    DEFPUSHBUTTON   "删除",BTN_DELETE,235,19,50,14
+END
+
+DLG_MODCONTACT DIALOGEX 0, 0, 310, 177
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "修改"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    DEFPUSHBUTTON   "修改",BTN_MODIFY,234,147,50,14
+    GROUPBOX        "联系人信息",IDC_STATIC,17,41,279,129
+    PUSHBUTTON      "搜索",BTN_MODSEARCH,246,19,50,14
+    EDITTEXT        ED_MODSEARCH,17,19,198,14,ES_AUTOHSCROLL
+    EDITTEXT        ED_MODNAME,90,65,119,14,ES_AUTOHSCROLL
+    EDITTEXT        ED_MODTEL,90,87,119,14,ES_AUTOHSCROLL
+    LTEXT           "姓名",IDC_STATIC,40,67,18,8
+    LTEXT           "电话",IDC_STATIC,40,90,18,8
+    LTEXT           "性别",IDC_STATIC,40,110,18,8
+    CONTROL         "男",RD_MODMALE,"Button",BS_AUTORADIOBUTTON | WS_GROUP,91,109,25,10
+    CONTROL         "女",RD_MODFEMALE,"Button",BS_AUTORADIOBUTTON,127,109,25,10
+    CONTROL         "未知",RD_MODUNKNOW,"Button",BS_AUTORADIOBUTTON,163,109,33,10
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// DESIGNINFO
+//
+
+#ifdef APSTUDIO_INVOKED
+GUIDELINES DESIGNINFO
+BEGIN
+    DLG_MAIN, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 303
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 170
+    END
+
+    DLG_ADDCONTACT, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 240
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 116
+    END
+
+    DLG_SHOWCONTACT, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 304
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 153
+    END
+
+    DLG_MODCONTACT, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 303
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 170
+    END
+END
+#endif    // APSTUDIO_INVOKED
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// AFX_DIALOG_LAYOUT
+//
+
+DLG_MAIN AFX_DIALOG_LAYOUT
+BEGIN
+    0
+END
+
+DLG_ADDCONTACT AFX_DIALOG_LAYOUT
+BEGIN
+    0
+END
+
+DLG_SHOWCONTACT AFX_DIALOG_LAYOUT
+BEGIN
+    0
+END
+
+DLG_MODCONTACT AFX_DIALOG_LAYOUT
+BEGIN
+    0
+END
+
+#endif    // 中文(简体，中国) resources
+/////////////////////////////////////////////////////////////////////////////
+
+
+
+#ifndef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 3 resource.
+//
+
+
+/////////////////////////////////////////////////////////////////////////////
+#endif    // not APSTUDIO_INVOKED
+

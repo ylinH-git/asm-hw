@@ -1,0 +1,22 @@
+# 作业1
+CREATE TABLE t_case_register(cash_register_id int PRIMARY KEY, cash_register_brand VARCHAR(255));
+
+CREATE TABLE t_cashier(cashier_id int PRIMARY KEY, cashier_name VARCHAR(255));
+
+CREATE TABLE t_good(g_id int PRIMARY KEY, g_name VARCHAR(255), g_price FLOAT);
+
+CREATE TABLE t_shop(shop_id int PRIMARY KEY, shop_name VARCHAR(255));
+
+CREATE TABLE t_bill(bill_id int PRIMARY KEY, bill_time datetime,  reg_id int, sid int, cashier_id int, FOREIGN KEY(sid) REFERENCES t_shop(shop_id), FOREIGN  KEY(reg_id) REFERENCES t_case_register(cash_register_id), FOREIGN  KEY(cashier_id) REFERENCES t_cashier(cashier_id));
+
+CREATE TABLE t_bill_good(bid int, gid int, good_num int, PRIMARY KEY(bid, gid), FOREIGN KEY(bid) REFERENCES t_bill(bill_id), FOREIGN KEY(gid) REFERENCES t_good(g_id));
+
+
+# 作业2
+CREATE TABLE t_job(job_name VARCHAR(255), job_id int PRIMARY KEY, job_salary_per_hour float);
+
+CREATE TABLE t_project(project_id int PRIMARY KEY, project_name VARCHAR(255));
+
+CREATE TABLE t_staff(staff_id int PRIMARY KEY, staff_name VARCHAR(255), jid int, FOREIGN KEY(jid) REFERENCES t_job(job_id));
+
+CREATE TABLE t_project_bill(sid int, pid int, worktime float, PRIMARY KEY(sid, pid), FOREIGN KEY(sid) REFERENCES t_staff(staff_id), FOREIGN KEY(pid) REFERENCES t_project(project_id));

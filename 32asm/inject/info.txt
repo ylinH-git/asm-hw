@@ -1,0 +1,187 @@
+01005AA0 字符串位置
+
+
+; 跳转的位置
+01001BE2   .  3BD6          cmp     edx, esi
+01001BE4   .  0F87 75030000 ja      01001F5F
+01001BEA  |. /0F84 95040000 je      01002085
+01001BF0   .  B8 00010000   mov     eax, 100
+
+
+
+
+; 跳转位置
+010020B6   . /E9 EE000000   jmp     010021A9
+
+
+
+# 画雷和数字的位置
+eax是列，ecx是行
+;判断行列是否在范围内start
+010037E1  /$  A1 18510001   mov     eax, dword ptr [1005118] ; 此地址是列
+010037E6  |.  85C0          test    eax, eax
+010037E8  |.  0F8E C8000000 jle     010038B6
+010037EE  |.  8B0D 1C510001 mov     ecx, dword ptr [100511C] ; 此地址是行
+010037F4  |.  85C9          test    ecx, ecx
+010037F6  |.  0F8E BA000000 jle     010038B6
+010037FC  |.  3B05 34530001 cmp     eax, dword ptr [1005334]
+01003802  |.  0F8F AE000000 jg      010038B6
+01003808  |.  3B0D 38530001 cmp     ecx, dword ptr [1005338]
+0100380E  |.  0F8F A2000000 jg      010038B6
+;判断行列是否在范围内end
+01003814  |.  53            push    ebx
+01003815  |.  33DB          xor     ebx, ebx
+01003817  |.  43            inc     ebx
+01003818  |.  833D A4570001>cmp     dword ptr [10057A4], 0
+0100381F  |.  75 4A         jnz     short 0100386B
+01003821  |.  833D 9C570001>cmp     dword ptr [100579C], 0
+01003828  |.  75 41         jnz     short 0100386B
+0100382A  |.  53            push    ebx
+0100382B  |.  E8 BD000000   call    010038ED
+01003830  |.  FF05 9C570001 inc     dword ptr [100579C]
+01003836  |.  E8 7AF0FFFF   call    010028B5
+0100383B  |.  6A 00         push    0                                ; /Timerproc = NULL
+0100383D  |.  68 E8030000   push    3E8                              ; |Timeout = 1000. ms
+01003842  |.  53            push    ebx                              ; |TimerID
+01003843  |.  FF35 245B0001 push    dword ptr [1005B24]              ; |hWnd = 00C4095A ('扫雷',class='扫雷')
+01003849  |.  891D 64510001 mov     dword ptr [1005164], ebx         ; |
+0100384F  |.  FF15 B4100001 call    dword ptr [<&USER32.SetTimer>]   ; \SetTimer
+01003855  |.  85C0          test    eax, eax
+01003857  |.  75 07         jnz     short 01003860
+01003859  |.  6A 04         push    4
+0100385B  |.  E8 F0000000   call    01003950
+01003860  |>  A1 18510001   mov     eax, dword ptr [1005118]
+01003865  |.  8B0D 1C510001 mov     ecx, dword ptr [100511C]
+0100386B  |>  841D 00500001 test    byte ptr [1005000], bl
+01003871  |.  5B            pop     ebx
+01003872  |.  75 10         jnz     short 01003884
+01003874  |.  6A FE         push    -2
+01003876  |.  59            pop     ecx
+01003877  |.  8BC1          mov     eax, ecx
+01003879  |.  890D 1C510001 mov     dword ptr [100511C], ecx
+0100387F  |.  A3 18510001   mov     dword ptr [1005118], eax
+01003884  |>  833D 44510001>cmp     dword ptr [1005144], 0
+0100388B  |.  74 09         je      short 01003896
+0100388D  |.  51            push    ecx
+0100388E  |.  50            push    eax
+0100388F  |.  E8 23FDFFFF   call    010035B7
+01003894  |.  EB 20         jmp     short 010038B6
+01003896  |>  8BD1          mov     edx, ecx
+01003898  |.  C1E2 05       shl     edx, 5
+0100389B  |.  8A9402 405300>mov     dl, byte ptr [edx+eax+1005340]
+010038A2  |.  F6C2 40       test    dl, 40
+010038A5  |.  75 0F         jnz     short 010038B6
+010038A7  |.  80E2 1F       and     dl, 1F
+010038AA  |.  80FA 0E       cmp     dl, 0E
+010038AD  |.  74 07         je      short 010038B6
+010038AF  |.  51            push    ecx
+010038B0  |.  50            push    eax
+010038B1  |.  E8 5CFCFFFF   call    01003512
+010038B6  |>  FF35 60510001 push    dword ptr [1005160]
+010038BC  |.  E8 52F0FFFF   call    01002913
+010038C1  \.  C3            retn
+
+
+; 判断是否是雷区的位置
+
+01003512  /$  8B4424 08     mov     eax, dword ptr [esp+8]
+01003516  |.  53            push    ebx
+01003517  |.  55            push    ebp
+01003518  |.  56            push    esi
+01003519  |.  8B7424 10     mov     esi, dword ptr [esp+10]
+0100351D  |.  8BC8          mov     ecx, eax
+0100351F  |.  0100351F  |.  C1E1 05       shl     ecx, 5
+01003522  |.  8D9431 405300>lea     edx, dword ptr [ecx+esi+1005340]
+01003529  |.  F602 80       test    byte ptr [edx], 80               ;  和80做与运算，不为0则初步判定有雷
+0100352C  |.  57            push    edi
+0100352D  |.  74 66         je      short 01003595
+0100352F  |.  833D A4570001>cmp     dword ptr [10057A4], 0           ;  不为0则确定有雷
+01003536  |.  75 50         jnz     short 01003588
+01003538  |.  8B2D 38530001 mov     ebp, dword ptr [1005338]
+0100353E  |.  33C0          xor     eax, eax
+01003540  |.  40            inc     eax
+01003541  |.  3BE8          cmp     ebp, eax
+01003543  |.  7E 6B         jle     short 010035B0
+01003545  |.  8B1D 34530001 mov     ebx, dword ptr [1005334]
+0100354B  |.  BF 60530001   mov     edi, 01005360
+01003550  |>  33C9          /xor     ecx, ecx
+01003552  |.  41            |inc     ecx
+01003553  |.  3BD9          |cmp     ebx, ecx
+01003555  |.  7E 0B         |jle     short 01003562
+01003557  |>  F6040F 80     |/test    byte ptr [edi+ecx], 80
+0100355B  |.  74 0F         ||je      short 0100356C
+0100355D  |.  41            ||inc     ecx
+0100355E  |.  3BCB          ||cmp     ecx, ebx
+01003560  |.^ 7C F5         |\jl      short 01003557
+01003562  |>  40            |inc     eax
+01003563  |.  83C7 20       |add     edi, 20
+01003566  |.  3BC5          |cmp     eax, ebp
+01003568  |.^ 7C E6         \jl      short 01003550
+0100356A  |.  EB 44         jmp     short 010035B0
+0100356C  |>  FF7424 18     push    dword ptr [esp+18]
+01003570  |.  C1E0 05       shl     eax, 5
+01003573  |.  8D8408 405300>lea     eax, dword ptr [eax+ecx+1005340]
+0100357A  |.  C602 0F       mov     byte ptr [edx], 0F
+0100357D  |.  8008 80       or      byte ptr [eax], 80
+01003580  |.  56            push    esi
+01003581  |.  E8 FEFAFFFF   call    01003084
+01003586  |.  EB 28         jmp     short 010035B0
+01003588  |>  6A 4C         push    4C
+0100358A  |.  50            push    eax
+0100358B  |.  56            push    esi
+0100358C  |.  E8 1AF9FFFF   call    01002EAB
+01003591  |.  6A 00         push    0
+01003593  |.  EB 16         jmp     short 010035AB
+; eax行
+;  esi列
+; 绘制非雷的位置
+01003595  |>  50            push    eax
+01003596  |.  56            push    esi
+01003597  |.  E8 E8FAFFFF   call    01003084
+0100359C  |.  A1 A4570001   mov     eax, dword ptr [10057A4]
+010035A1  |.  3B05 A0570001 cmp     eax, dword ptr [10057A0]
+010035A7  |.  75 07         jnz     short 010035B0
+010035A9  |.  6A 01         push    1
+010035AB  |>  E8 CCFEFFFF   call    0100347C
+010035B0  |>  5F            pop     edi
+010035B1  |.  5E            pop     esi
+010035B2  |.  5D            pop     ebp
+010035B3  |.  5B            pop     ebx
+010035B4  \.  C2 0800       retn    8
+
+
+
+计算行列地址
+0100205F  |> \FF75 08       push    dword ptr [ebp+8]                ; /hWnd
+01002062  |.  FF15 E4100001 call    dword ptr [<&USER32.SetCapture>] ; \SetCapture
+01002068  |.  830D 18510001>or      dword ptr [1005118], FFFFFFFF
+0100206F  |.  830D 1C510001>or      dword ptr [100511C], FFFFFFFF
+01002076  |.  53            push    ebx
+01002077  |.  891D 40510001 mov     dword ptr [1005140], ebx
+0100207D  |.  E8 91080000   call    01002913
+01002082  |.  8B4D 14       mov     ecx, dword ptr [ebp+14]
+01002085  |>  393D 40510001 cmp     dword ptr [1005140], edi
+0100208B  |.  74 34         je      short 010020C1
+0100208D  |.  841D 00500001 test    byte ptr [1005000], bl
+01002093  |.^ 0F84 54FFFFFF je      01001FED
+01002099  |.  8B45 14       mov     eax, dword ptr [ebp+14]
+0100209C  |.  C1E8 10       shr     eax, 10
+0100209F  |.  83E8 27       sub     eax, 27
+010020A2  |.  C1F8 04       sar     eax, 4
+010020A5  |.  50            push    eax
+010020A6  |.  0FB745 14     movzx   eax, word ptr [ebp+14]
+010020AA  |.  83C0 04       add     eax, 4
+010020AD  |.  C1F8 04       sar     eax, 4
+010020B0  |.  50            push    eax
+010020B1  |>  E8 1E110000   call    010031D4
+
+
+; 编辑位置
+01004A60      830D 18510001 FF   or      dword ptr [1005118], FFFFFFFF
+01004A67      830D 1C510001 FF   or      dword ptr [100511C], FFFFFFFF
+
+
+
+
+
+
