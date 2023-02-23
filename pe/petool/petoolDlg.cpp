@@ -52,6 +52,7 @@ END_MESSAGE_MAP()
 
 CpetoolDlg::CpetoolDlg(CWnd* pParent /*=nullptr*/)
 	: CDialogEx(IDD_PETOOL_DIALOG, pParent)
+	, m_filePath(_T(""))
 {
 	m_hIcon = AfxGetApp()->LoadIcon(IDR_MAINFRAME);
 }
@@ -60,13 +61,16 @@ void CpetoolDlg::DoDataExchange(CDataExchange* pDX)
 {
 	CDialogEx::DoDataExchange(pDX);
 	DDX_Control(pDX, TREE_PE, m_peTree);
-	DDX_Control(pDX, FILE_BROWSE, m_fileBrowse);
+	DDX_Text(pDX, FILE_BROWSE, m_filePath);
 }
 
 BEGIN_MESSAGE_MAP(CpetoolDlg, CDialogEx)
 	ON_WM_SYSCOMMAND()
 	ON_WM_PAINT()
 	ON_WM_QUERYDRAGICON()
+	ON_BN_CLICKED(BTN_OPEN, &CpetoolDlg::OnBnClickedOpen)
+	ON_BN_CLICKED(BTN_SAVE, &CpetoolDlg::OnBnClickedSave)
+	ON_NOTIFY(TVN_SELCHANGED, TREE_PE, &CpetoolDlg::OnSelchangedTreePe)
 END_MESSAGE_MAP()
 
 
@@ -102,12 +106,6 @@ BOOL CpetoolDlg::OnInitDialog()
 	SetIcon(m_hIcon, FALSE);		// 设置小图标
 
 	// TODO: 在此添加额外的初始化代码
-	CString filePath;
-	m_fileBrowse.GetWindowText(filePath);
-	if (filePath)
-	{
-		CreatePeTree(filePath);
-	}
 	return TRUE;  // 除非将焦点设置到控件，否则返回 TRUE
 }
 
@@ -182,3 +180,66 @@ void CpetoolDlg::CreatePeTree(CString fileName)
 	m_peTree.InsertItem("UPX Utility", peFileInfo);
 }
 
+
+
+void CpetoolDlg::OnBnClickedOpen()
+{
+	UpdateData(TRUE);
+	if (!m_filePath.IsEmpty())
+	{
+		if (!m_bIsInited) {
+			CreatePeTree(m_filePath);
+			m_bIsInited = true;
+		}
+		else {
+			AfxMessageBox("刷新树");
+		}
+	}
+	else
+	{
+		AfxMessageBox("未选择文件");
+	}
+}
+
+
+void CpetoolDlg::OnBnClickedSave()
+{
+	AfxMessageBox("暂未支持");
+}
+
+
+void CpetoolDlg::OnSelchangedTreePe(NMHDR* pNMHDR, LRESULT* pResult)
+{
+	LPNMTREEVIEW pNMTreeView = reinterpret_cast<LPNMTREEVIEW>(pNMHDR);
+	// TODO: 在此添加控件通知处理程序代码
+	*pResult = 0;
+	AfxMessageBox(pNMTreeView->itemNew.pszText);
+	//int nIdx = m_tab.GetCurSel();
+	//m_generalDlg.ShowWindow(SW_HIDE);
+	//m_styleDlg.ShowWindow(SW_HIDE);
+	//m_winDlg.ShowWindow(SW_HIDE);
+	//m_classDlg.ShowWindow(SW_HIDE);
+	//m_prcessDlg.ShowWindow(SW_HIDE);
+
+	//switch (nIdx)
+	//{
+	//case 0:
+	//	m_generalDlg.ShowWindow(SW_SHOW);
+	//	break;
+	//case 1:
+	//	m_styleDlg.ShowWindow(SW_SHOW);
+	//	break;
+	//case 2:
+	//	m_winDlg.ShowWindow(SW_SHOW);
+	//	break;
+	//case 3:
+	//	m_classDlg.ShowWindow(SW_SHOW);
+	//	break;
+	//case 4:
+	//	m_prcessDlg.ShowWindow(SW_SHOW);
+	//	break;
+	//default:
+	//	break;
+	//}
+
+}

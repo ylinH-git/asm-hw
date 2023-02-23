@@ -31,11 +31,14 @@ protected:
 	afx_msg void OnPaint();
 	afx_msg HCURSOR OnQueryDragIcon();
 	DECLARE_MESSAGE_MAP()
-public:
-	CTreeCtrl m_peTree;
 
 private:
 	void CreatePeTree(CString fileName);
 public:
-	CMFCEditBrowseCtrl m_fileBrowse;
+	afx_msg void OnBnClickedOpen();
+	afx_msg void OnBnClickedSave();
+	bool m_bIsInited;
+	CTreeCtrl m_peTree;
+	CString m_filePath;
+	afx_msg void OnSelchangedTreePe(NMHDR* pNMHDR, LRESULT* pResult);
 };
