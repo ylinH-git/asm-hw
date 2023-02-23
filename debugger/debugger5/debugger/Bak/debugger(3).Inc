@@ -10,6 +10,3 @@ includelib user32.lib
 includelib Comctl32.lib
 includelib shell32.lib
 includelib msvcrt.lib
-includelib disasm.lib
-
-DisasmLine proto code:LPBYTE , nCodeSize:DWORD , nAddr:DWORD , szAsm:LPSTR

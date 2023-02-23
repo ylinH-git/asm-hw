@@ -2,15 +2,9 @@
 .model flat, stdcall  ;32 bit memory model
 option casemap :none  ;case sensitive
 
-include debugger.inc
-
-ACCESS_READ_EXCEPT equ 0 
-ACCESS_WRITE_EXCEPT equ 1
-
-bpStruct struc
-	m_oldCode db 0
-	m_dwAddr  dd 0
-bpStruct ends
+include global.inc
+include disasm.inc
+include utils.inc
 
 .const
 	g_szExe 						db "test.exe", 0
@@ -34,7 +28,7 @@ bpStruct ends
 
 .data
     g_de        DEBUG_EVENT <0>
-    g_hProc     HANDLE 0
+    public g_hProc     HANDLE 0
     g_szCommand db 256 dup(0)
     g_bIsSysBp  db TRUE
 	g_bpList bpStruct 100 dup(<?>) ;断点数组
@@ -772,7 +766,7 @@ main proc
     
     ;建立调试会话
     invoke CreateProcess, NULL, offset g_szExe, NULL, NULL, FALSE, \
-            DEBUG_ONLY_THIS_PROCESS or or CREATE_NEW_CONSOLE, NULL, NULL, addr @si, addr @pi
+            DEBUG_ONLY_THIS_PROCESS or CREATE_NEW_CONSOLE, NULL, NULL, addr @si, addr @pi
             
     mov eax, @pi.hProcess
     mov g_hProc, eax

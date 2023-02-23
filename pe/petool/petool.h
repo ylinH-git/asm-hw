@@ -23,6 +23,7 @@ public:
 // 重写
 public:
 	virtual BOOL InitInstance();
+	CFileFind m_fileFinder;
 
 // 实现
 

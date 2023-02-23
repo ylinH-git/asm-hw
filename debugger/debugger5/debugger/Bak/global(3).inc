@@ -10,6 +10,15 @@ includelib user32.lib
 includelib Comctl32.lib
 includelib shell32.lib
 includelib msvcrt.lib
-includelib disasm.lib
 
-DisasmLine proto code:LPBYTE , nCodeSize:DWORD , nAddr:DWORD , szAsm:LPSTR
+
+ACCESS_READ_EXCEPT equ 0 
+ACCESS_WRITE_EXCEPT equ 1
+
+bpStruct struc
+	m_oldCode db 0
+	m_dwAddr  dd 0
+bpStruct ends
+
+.data
+    public g_hProc     HANDLE 0

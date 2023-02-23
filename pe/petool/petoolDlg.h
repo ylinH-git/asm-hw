@@ -4,6 +4,7 @@
 
 #pragma once
 #include "CFileInfoDlg.h"
+#include "CDosHeaderDlg.h"
 
 // CpetoolDlg 对话框
 class CpetoolDlg : public CDialogEx
@@ -35,6 +36,7 @@ protected:
 private:
 	void CreatePeTree(CString fileName);
 	void InitFileInfoDlg();
+	void InitDosHeaderDlg();
 public:
 	afx_msg void OnBnClickedOpen();
 	afx_msg void OnBnClickedSave();
@@ -60,4 +62,5 @@ public:
 	HTREEITEM m_resEditor;
 	HTREEITEM m_upx;
 	CFileInfoDlg m_fileInfoDlg;
+	CDosHeaderDlg m_dosHeaderDlg;
 };

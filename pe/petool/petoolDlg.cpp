@@ -180,6 +180,7 @@ void CpetoolDlg::CreatePeTree(CString fileName)
 	m_upx = m_peTree.InsertItem("UPX Utility", m_peFileInfo);
 
 	InitFileInfoDlg();
+	InitDosHeaderDlg();
 	CRect rc;
 	GetClientRect(&rc);
 
@@ -187,6 +188,7 @@ void CpetoolDlg::CreatePeTree(CString fileName)
 	rc.top += 53;
 
 	m_fileInfoDlg.MoveWindow(&rc);
+	m_dosHeaderDlg.MoveWindow(&rc);
 
 	m_fileInfoDlg.ShowWindow(SW_SHOW);
 
@@ -197,6 +199,11 @@ void CpetoolDlg::InitFileInfoDlg()
 	m_fileInfoDlg.Create(DLG_FILE_INFO, this);
 }
 
+void CpetoolDlg::InitDosHeaderDlg()
+{
+	m_dosHeaderDlg.Create(DLG_DOS_HEADER, this);
+}
+
 
 
 void CpetoolDlg::OnBnClickedOpen()
@@ -204,12 +211,22 @@ void CpetoolDlg::OnBnClickedOpen()
 	UpdateData(TRUE);
 	if (!m_filePath.IsEmpty())
 	{
-		if (!m_bIsInited) {
-			CreatePeTree(m_filePath);
-			m_bIsInited = true;
+		BOOL bResult = theApp.m_fileFinder.FindFile(m_filePath);
+		if (bResult)
+		{
+			bResult = theApp.m_fileFinder.FindNextFile();
+			if (!m_bIsInited) {
+				CString fileName = theApp.m_fileFinder.GetFileName();
+				CreatePeTree(fileName);
+				m_bIsInited = true;
+			}
+			else {
+				AfxMessageBox("刷新树");
+			}
 		}
-		else {
-			AfxMessageBox("刷新树");
+		else
+		{
+			AfxMessageBox("未找到此文件");
 		}
 	}
 	else
@@ -231,37 +248,20 @@ void CpetoolDlg::OnSelchangedTreePe(NMHDR* pNMHDR, LRESULT* pResult)
 	// TODO: 在此添加控件通知处理程序代码
 	*pResult = 0;
 
-	AfxMessageBox(pNMTreeView->itemNew.pszText);
-
 	m_fileInfoDlg.ShowWindow(SW_HIDE);
-	//m_styleDlg.ShowWindow(SW_HIDE);
-	//m_winDlg.ShowWindow(SW_HIDE);
-	//m_classDlg.ShowWindow(SW_HIDE);
-	//m_prcessDlg.ShowWindow(SW_HIDE);
+	m_dosHeaderDlg.ShowWindow(SW_HIDE);
 
 	if (pNMTreeView->itemNew.hItem == m_peFileInfo)
 	{
 		m_fileInfoDlg.ShowWindow(SW_SHOW);
+		return;
 	}
-	//switch (nIdx)
-	//{
-	//case 0:
-	//	m_generalDlg.ShowWindow(SW_SHOW);
-	//	break;
-	//case 1:
-	//	m_styleDlg.ShowWindow(SW_SHOW);
-	//	break;
-	//case 2:
-	//	m_winDlg.ShowWindow(SW_SHOW);
-	//	break;
-	//case 3:
-	//	m_classDlg.ShowWindow(SW_SHOW);
-	//	break;
-	//case 4:
-	//	m_prcessDlg.ShowWindow(SW_SHOW);
-	//	break;
-	//default:
-	//	break;
-	//}
+
+
+	if (pNMTreeView->itemNew.hItem == m_dosHeader)
+	{
+		m_dosHeaderDlg.ShowWindow(SW_SHOW);
+		return;
+	}
 
 }

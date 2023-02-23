@@ -24,6 +24,8 @@ CFileInfoDlg::~CFileInfoDlg()
 void CFileInfoDlg::DoDataExchange(CDataExchange* pDX)
 {
 	CDialogEx::DoDataExchange(pDX);
+	DDX_Control(pDX, LIST_FILE_MAIN_INFO, m_fileBaseInfo);
+	DDX_Control(pDX, LIST_FILE_MORE_INFO, m_fileMoreInfo);
 }
 
 

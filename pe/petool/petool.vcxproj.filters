@@ -36,6 +36,9 @@
     <ClInclude Include="CFileInfoDlg.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="CDosHeaderDlg.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="petool.cpp">
@@ -48,6 +51,9 @@
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="CFileInfoDlg.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="CDosHeaderDlg.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>

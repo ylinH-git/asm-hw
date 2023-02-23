@@ -4,6 +4,8 @@ option casemap :none  ;case sensitive
 
 include debugger.inc
 
+ACCESS_READ_EXCEPT equ 0 
+ACCESS_WRITE_EXCEPT equ 1
 
 bpStruct struc
 	m_oldCode db 0
@@ -11,7 +13,7 @@ bpStruct struc
 bpStruct ends
 
 .const
-	g_szExe 						db "winmine.exe", 0
+	g_szExe 						db "test.exe", 0
 	g_szSystemBegin 				db "start debugging...", 0dh, 0ah, 0
     g_szOUTPUT_DEBUG_STRING_EVENT  	db "OUTPUT_DEBUG_STRING_EVENT",0
     g_szCommandErrTip              	db "命令出错", 0dh, 0ah, 0
@@ -643,6 +645,7 @@ OnExcept proc
     LOCAL @bIsInputCmd:DWORD
     LOCAL @hThread:HANDLE
 	LOCAL @ctx:CONTEXT
+	LOCAL @dwOldProc:DWORD
 
     lea esi, g_de.u.Exception.pExceptionRecord
     assume esi:ptr EXCEPTION_RECORD
@@ -769,7 +772,7 @@ main proc
     
     ;建立调试会话
     invoke CreateProcess, NULL, offset g_szExe, NULL, NULL, FALSE, \
-            DEBUG_ONLY_THIS_PROCESS, NULL, NULL, addr @si, addr @pi
+            DEBUG_ONLY_THIS_PROCESS or or CREATE_NEW_CONSOLE, NULL, NULL, addr @si, addr @pi
             
     mov eax, @pi.hProcess
     mov g_hProc, eax

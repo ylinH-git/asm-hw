@@ -4,6 +4,8 @@ option casemap :none  ;case sensitive
 
 include debugger.inc
 
+ACCESS_READ_EXCEPT equ 0 
+ACCESS_WRITE_EXCEPT equ 1
 
 bpStruct struc
 	m_oldCode db 0
@@ -20,8 +22,9 @@ bpStruct ends
    	g_szSystemBp					db "命中系统断点:0x", 0
    	g_szCustomBp					db "命中一般断点:0x", 0
    	g_szBhTip                       db "命中硬件执行断点 %08X", 0dh, 0ah, 0
-   	g_szBaETip                       db "命中硬件访问断点 %08X", 0dh, 0ah, 0
-   	g_szBaWTip                       db "命中硬件写入断点 %08X", 0dh, 0ah, 0
+   	g_szBaETip                      db "命中硬件访问断点 %08X", 0dh, 0ah, 0
+   	g_szBaWTip                      db "命中硬件写入断点 %08X", 0dh, 0ah, 0
+   	g_szBmTip                      	db "命中内存写入断点 %08X", 0dh, 0ah, 0
     g_szFmt                        	db "%s",0dh, 0ah, 0
     g_szBpFmt                       db "%s%+08X",0dh, 0ah, 0
     g_szBpListFmt                  	db "%+4u      %+08X",0dh, 0ah, 0
@@ -732,6 +735,22 @@ OnExcept proc
             invoke InputCommand
         .endif
 
+    .elseif [esi].ExceptionCode == EXCEPTION_ACCESS_VIOLATION
+        invoke VirtualProtectEx,g_hProc, g_dwMmbpAddr, g_dwMmbpLen, g_dwMmbpOld, addr @dwOldProc
+        
+        invoke SetTF
+        mov g_bIsBmSingleStep, TRUE
+        
+        mov eax, [esi].ExceptionInformation[4]
+        mov ecx, g_dwMmbpAddr
+        add ecx, g_dwMmbpLen
+        .if eax >= g_dwMmbpAddr && eax < ecx
+            .if [esi].ExceptionInformation[0] == ACCESS_WRITE_EXCEPT
+                invoke crt_printf, offset g_szBmTip, eax
+                
+                invoke InputCommand
+            .endif
+        .endif
     .endif
     
     mov eax, @dwStatus
