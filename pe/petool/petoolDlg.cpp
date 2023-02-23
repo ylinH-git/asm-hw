@@ -104,7 +104,26 @@ BOOL CpetoolDlg::OnInitDialog()
 	//  执行此操作
 	SetIcon(m_hIcon, TRUE);			// 设置大图标
 	SetIcon(m_hIcon, FALSE);		// 设置小图标
+	InitFileInfoDlg();
+	InitDosHeaderDlg();
+	InitNtHeadersDlg();
+	InitFileHeaderDlg();
+	InitOptionalHeaderDlg();
+	InitDataDirectoriesDlg();
 
+
+	CRect rc;
+	GetClientRect(&rc);
+
+	rc.left += 340;
+	rc.top += 53;
+
+	m_fileInfoDlg.MoveWindow(&rc);
+	m_dosHeaderDlg.MoveWindow(&rc);
+	m_ntHeaderDlg.MoveWindow(&rc);
+	m_fileHeaderDlg.MoveWindow(&rc);
+	m_optionalHeaderDlg.MoveWindow(&rc);
+	m_dataDirectoriesDlg.MoveWindow(&rc);
 	// TODO: 在此添加额外的初始化代码
 	return TRUE;  // 除非将焦点设置到控件，否则返回 TRUE
 }
@@ -166,7 +185,7 @@ void CpetoolDlg::CreatePeTree(CString fileName)
 	m_ntHeader = m_peTree.InsertItem("Nt Header", m_peFileInfo);
 	m_fileHeader = m_peTree.InsertItem("File Header", m_ntHeader);
 	m_optionalHeader = m_peTree.InsertItem("Optional Header", m_ntHeader);
-	m_dataDirection =  m_peTree.InsertItem("Data Direction [x]", m_optionalHeader);
+	m_dataDirectories =  m_peTree.InsertItem("Data Direction [x]", m_optionalHeader);
 	m_importDirectory = m_peTree.InsertItem("Import Directory]", m_peFileInfo);
 	m_resDirectory = m_peTree.InsertItem("Resource Directory", m_peFileInfo);
 	m_addrConverter =  m_peTree.InsertItem("Address Converter", m_peFileInfo);
@@ -179,18 +198,15 @@ void CpetoolDlg::CreatePeTree(CString fileName)
 	m_resEditor = m_peTree.InsertItem("Resource Editor", m_peFileInfo);
 	m_upx = m_peTree.InsertItem("UPX Utility", m_peFileInfo);
 
-	InitFileInfoDlg();
-	InitDosHeaderDlg();
-	CRect rc;
-	GetClientRect(&rc);
-
-	rc.left += 340;
-	rc.top += 53;
-
-	m_fileInfoDlg.MoveWindow(&rc);
-	m_dosHeaderDlg.MoveWindow(&rc);
-
+	HideAllDlg();
 	m_fileInfoDlg.ShowWindow(SW_SHOW);
+
+	m_fileInfoDlg.OnInitDialog();
+	m_dosHeaderDlg.OnInitDialog();
+	m_ntHeaderDlg.OnInitDialog();
+	m_fileHeaderDlg.OnInitDialog();
+	m_optionalHeaderDlg.OnInitDialog();
+	m_dataDirectoriesDlg.OnInitDialog();
 
 }
 
@@ -204,29 +220,100 @@ void CpetoolDlg::InitDosHeaderDlg()
 	m_dosHeaderDlg.Create(DLG_DOS_HEADER, this);
 }
 
+void CpetoolDlg::GetDosStruct()
+{
+	int dosHeaderLen = sizeof(IMAGE_DOS_HEADER);
+	RtlZeroMemory(&theApp.m_dosHeaderBuf, dosHeaderLen);
+	fread(&theApp.m_dosHeaderBuf, 1, dosHeaderLen, theApp.m_pFile);
+	theApp.m_ntOffset = theApp.m_dosHeaderBuf.e_lfanew;
+}
+
+void CpetoolDlg::GetNtStruct()
+{
+	int ntHeaderLen = sizeof(IMAGE_NT_HEADERS);
+	fseek(theApp.m_pFile, theApp.m_ntOffset, SEEK_SET);
+	RtlZeroMemory(&theApp.m_ntHeader, ntHeaderLen);
+	fread(&theApp.m_ntHeader, 1, ntHeaderLen, theApp.m_pFile);
+}
+
+void CpetoolDlg::GetFileHStruct()
+{
+	theApp.m_fileHeader = theApp.m_ntHeader.FileHeader;
+	if (theApp.m_fileHeader.Machine == IMAGE_FILE_MACHINE_I386)
+	{
+		theApp.isx86 = true;
+	}
+	else
+	{
+		theApp.isx86 = false;
+	}
+}
+
+void CpetoolDlg::GetOptionalStruct()
+{
+	fseek(theApp.m_pFile, theApp.m_ntOffset + sizeof(&theApp.m_ntHeader.Signature) + sizeof(&theApp.m_ntHeader.FileHeader), SEEK_SET);
+	if (theApp.isx86)
+	{
+		int op32Len = sizeof(IMAGE_OPTIONAL_HEADER32);
+		int op64Len = sizeof(IMAGE_OPTIONAL_HEADER64);
+		RtlZeroMemory(&theApp.m_optional64Header, op64Len);
+		fread(&theApp.m_optional32Header, 1, op32Len, theApp.m_pFile);
+	}
+	else
+	{
+		int op32Len = sizeof(IMAGE_OPTIONAL_HEADER32);
+		int op64Len = sizeof(IMAGE_OPTIONAL_HEADER64);
+		RtlZeroMemory(&theApp.m_optional32Header, op32Len);
+		fread(&theApp.m_optional64Header, 1, op64Len, theApp.m_pFile);
+	}
+}
+
+void CpetoolDlg::GetDataDirStruct()
+{
+}
+
+void CpetoolDlg::HideAllDlg()
+{
+	m_fileInfoDlg.ShowWindow(SW_HIDE);
+	m_dosHeaderDlg.ShowWindow(SW_HIDE);
+	m_ntHeaderDlg.ShowWindow(SW_HIDE);
+	m_fileHeaderDlg.ShowWindow(SW_HIDE);
+	m_optionalHeaderDlg.ShowWindow(SW_HIDE);
+	m_dataDirectoriesDlg.ShowWindow(SW_HIDE);
+}
+
 
 
 void CpetoolDlg::OnBnClickedOpen()
 {
 	UpdateData(TRUE);
+
 	if (!m_filePath.IsEmpty())
 	{
-		BOOL bResult = theApp.m_fileFinder.FindFile(m_filePath);
-		if (bResult)
+		if (theApp.m_pFile)
 		{
-			bResult = theApp.m_fileFinder.FindNextFile();
+			fclose(theApp.m_pFile);
+		}
+		bool bRet = fopen_s(&theApp.m_pFile, m_filePath.GetString(), "rb");
+		if (!bRet)
+		{
+			GetDosStruct();
+			GetNtStruct();
+			GetFileHStruct();
+			GetOptionalStruct();
+			GetDataDirStruct();
 			if (!m_bIsInited) {
-				CString fileName = theApp.m_fileFinder.GetFileName();
-				CreatePeTree(fileName);
+				CreatePeTree(m_filePath);
 				m_bIsInited = true;
 			}
 			else {
-				AfxMessageBox("刷新树");
+				m_peTree.DeleteAllItems();
+				CreatePeTree(m_filePath);
 			}
 		}
 		else
 		{
-			AfxMessageBox("未找到此文件");
+			AfxMessageBox("打开文件失败");
 		}
 	}
 	else
@@ -248,8 +335,7 @@ void CpetoolDlg::OnSelchangedTreePe(NMHDR* pNMHDR, LRESULT* pResult)
 	// TODO: 在此添加控件通知处理程序代码
 	*pResult = 0;
 
-	m_fileInfoDlg.ShowWindow(SW_HIDE);
-	m_dosHeaderDlg.ShowWindow(SW_HIDE);
+	HideAllDlg();
 
 	if (pNMTreeView->itemNew.hItem == m_peFileInfo)
 	{
@@ -264,4 +350,48 @@ void CpetoolDlg::OnSelchangedTreePe(NMHDR* pNMHDR, LRESULT* pResult)
 		return;
 	}
 
+	if (pNMTreeView->itemNew.hItem == m_ntHeader)
+	{
+		m_ntHeaderDlg.ShowWindow(SW_SHOW);
+		return;
+	}
+
+	if (pNMTreeView->itemNew.hItem == m_fileHeader)
+	{
+		m_fileHeaderDlg.ShowWindow(SW_SHOW);
+		return;
+	}
+
+	if (pNMTreeView->itemNew.hItem == m_optionalHeader)
+	{
+		m_optionalHeaderDlg.ShowWindow(SW_SHOW);
+		return;
+	}
+
+	if (pNMTreeView->itemNew.hItem == m_dataDirectories)
+	{
+		m_dataDirectoriesDlg.ShowWindow(SW_SHOW);
+		return;
+	}
+
+}
+
+void CpetoolDlg::InitNtHeadersDlg()
+{
+	m_ntHeaderDlg.Create(DLG_NT_HEADER, this);
+}
+
+void CpetoolDlg::InitFileHeaderDlg()
+{
+	m_fileHeaderDlg.Create(DLG_FILE_HEADER, this);
+}
+
+void CpetoolDlg::InitOptionalHeaderDlg()
+{
+	m_optionalHeaderDlg.Create(DLG_OPTIONAL_HEADER, this);
+}
+
+void CpetoolDlg::InitDataDirectoriesDlg()
+{
+	m_dataDirectoriesDlg.Create(DLG_DATA_DIRECTORIES, this);
 }

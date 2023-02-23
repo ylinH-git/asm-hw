@@ -24,4 +24,5 @@ protected:
 public:
 	CListCtrl m_fileBaseInfo;
 	CListCtrl m_fileMoreInfo;
+	virtual BOOL OnInitDialog();
 };

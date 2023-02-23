@@ -5,6 +5,10 @@
 #pragma once
 #include "CFileInfoDlg.h"
 #include "CDosHeaderDlg.h"
+#include "CNtHeadersDlg.h"
+#include "CFileHeaderDlg.h"
+#include "COptionalHeaderDlg.h"
+#include "CDataDirectoriesDlg.h"
 
 // CpetoolDlg 对话框
 class CpetoolDlg : public CDialogEx
@@ -37,6 +41,16 @@ private:
 	void CreatePeTree(CString fileName);
 	void InitFileInfoDlg();
 	void InitDosHeaderDlg();
+	void InitNtHeadersDlg();
+	void InitFileHeaderDlg();
+	void InitOptionalHeaderDlg();
+	void InitDataDirectoriesDlg();
+	void GetDosStruct();
+	void GetNtStruct();
+	void GetFileHStruct();
+	void GetOptionalStruct();
+	void GetDataDirStruct();
+	void HideAllDlg();
 public:
 	afx_msg void OnBnClickedOpen();
 	afx_msg void OnBnClickedSave();
@@ -49,7 +63,7 @@ public:
 	HTREEITEM m_ntHeader;
 	HTREEITEM m_fileHeader;
 	HTREEITEM m_optionalHeader;
-	HTREEITEM m_dataDirection;
+	HTREEITEM m_dataDirectories;
 	HTREEITEM m_importDirectory;
 	HTREEITEM m_resDirectory;
 	HTREEITEM m_addrConverter;
@@ -63,4 +77,8 @@ public:
 	HTREEITEM m_upx;
 	CFileInfoDlg m_fileInfoDlg;
 	CDosHeaderDlg m_dosHeaderDlg;
+	CNtHeadersDlg m_ntHeaderDlg;
+	CFileHeaderDlg m_fileHeaderDlg;
+	COptionalHeaderDlg m_optionalHeaderDlg;
+	CDataDirectoriesDlg m_dataDirectoriesDlg;
 };

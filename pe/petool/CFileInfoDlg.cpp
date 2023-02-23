@@ -34,3 +34,14 @@ END_MESSAGE_MAP()
 
 
 // CFileInfoDlg 消息处理程序
+
+
+BOOL CFileInfoDlg::OnInitDialog()
+{
+	CDialogEx::OnInitDialog();
+
+	// TODO:  在此添加额外的初始化
+
+	return TRUE;  // return TRUE unless you set the focus to a control
+	// 异常: OCX 属性页应返回 FALSE
+}

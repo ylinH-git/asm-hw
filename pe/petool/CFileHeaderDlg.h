@@ -2,19 +2,19 @@
 #include "afxdialogex.h"
 
 
-// CDosHeaderDlg 对话框
+// CFileHeaderDlg 对话框
 
-class CDosHeaderDlg : public CDialogEx
+class CFileHeaderDlg : public CDialogEx
 {
-	DECLARE_DYNAMIC(CDosHeaderDlg)
+	DECLARE_DYNAMIC(CFileHeaderDlg)
 
 public:
-	CDosHeaderDlg(CWnd* pParent = nullptr);   // 标准构造函数
-	virtual ~CDosHeaderDlg();
+	CFileHeaderDlg(CWnd* pParent = nullptr);   // 标准构造函数
+	virtual ~CFileHeaderDlg();
 
 // 对话框数据
 #ifdef AFX_DESIGN_TIME
-	enum { IDD = DLG_DOS_HEADER };
+	enum { IDD = DLG_FILE_HEADER };
 #endif
 
 protected:
@@ -22,7 +22,7 @@ protected:
 
 	DECLARE_MESSAGE_MAP()
 public:
-	CListCtrl m_dosHeaderList;
+	CListCtrl m_fileHeaderList;
 	virtual BOOL OnInitDialog();
 	void InitList();
 	void RenderListData();

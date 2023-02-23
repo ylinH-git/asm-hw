@@ -39,6 +39,18 @@
     <ClInclude Include="CDosHeaderDlg.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="CNtHeadersDlg.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="CFileHeaderDlg.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="COptionalHeaderDlg.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="CDataDirectoriesDlg.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="petool.cpp">
@@ -54,6 +66,18 @@
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="CDosHeaderDlg.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="CNtHeadersDlg.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="CFileHeaderDlg.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="COptionalHeaderDlg.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="CDataDirectoriesDlg.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>
