@@ -3,7 +3,7 @@
 //
 
 #pragma once
-
+#include "CFileInfoDlg.h"
 
 // CpetoolDlg 对话框
 class CpetoolDlg : public CDialogEx
@@ -34,6 +34,7 @@ protected:
 
 private:
 	void CreatePeTree(CString fileName);
+	void InitFileInfoDlg();
 public:
 	afx_msg void OnBnClickedOpen();
 	afx_msg void OnBnClickedSave();
@@ -41,4 +42,22 @@ public:
 	CTreeCtrl m_peTree;
 	CString m_filePath;
 	afx_msg void OnSelchangedTreePe(NMHDR* pNMHDR, LRESULT* pResult);
+	HTREEITEM m_peFileInfo;
+	HTREEITEM m_dosHeader;
+	HTREEITEM m_ntHeader;
+	HTREEITEM m_fileHeader;
+	HTREEITEM m_optionalHeader;
+	HTREEITEM m_dataDirection;
+	HTREEITEM m_importDirectory;
+	HTREEITEM m_resDirectory;
+	HTREEITEM m_addrConverter;
+	HTREEITEM m_depWalker;
+	HTREEITEM m_hexEditor;
+	HTREEITEM m_identifier;
+	HTREEITEM m_importAdder;
+	HTREEITEM m_quickDisasm;
+	HTREEITEM m_rebuilder;
+	HTREEITEM m_resEditor;
+	HTREEITEM m_upx;
+	CFileInfoDlg m_fileInfoDlg;
 };

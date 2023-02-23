@@ -161,23 +161,40 @@ HCURSOR CpetoolDlg::OnQueryDragIcon()
 void CpetoolDlg::CreatePeTree(CString fileName)
 {
 	m_peTree.ModifyStyle(NULL, TVS_LINESATROOT | TVS_HASLINES | TVS_HASBUTTONS);
-	auto peFileInfo = m_peTree.InsertItem("File：" + fileName);
-	m_peTree.InsertItem("Dos Header", peFileInfo);
-	auto ntHeader = m_peTree.InsertItem("Nt Header", peFileInfo);
-	m_peTree.InsertItem("File Header", ntHeader);
-	auto optionalHeader = m_peTree.InsertItem("Optional Header", ntHeader);
-	m_peTree.InsertItem("Data Direction [x]", optionalHeader);
-	m_peTree.InsertItem("Import Directory]", peFileInfo);
-	m_peTree.InsertItem("Resource Directory", peFileInfo);
-	m_peTree.InsertItem("Address Converter", peFileInfo);
-	m_peTree.InsertItem("Dependency Walker", peFileInfo);
-	m_peTree.InsertItem("Hex Editor", peFileInfo);
-	m_peTree.InsertItem("Identifier", peFileInfo);
-	m_peTree.InsertItem("Import Adder", peFileInfo);
-	m_peTree.InsertItem("Quick Disassembler", peFileInfo);
-	m_peTree.InsertItem("Rebuilder", peFileInfo);
-	m_peTree.InsertItem("Resource Editor", peFileInfo);
-	m_peTree.InsertItem("UPX Utility", peFileInfo);
+	m_peFileInfo = m_peTree.InsertItem("File：" + fileName);
+	m_dosHeader = m_peTree.InsertItem("Dos Header", m_peFileInfo);
+	m_ntHeader = m_peTree.InsertItem("Nt Header", m_peFileInfo);
+	m_fileHeader = m_peTree.InsertItem("File Header", m_ntHeader);
+	m_optionalHeader = m_peTree.InsertItem("Optional Header", m_ntHeader);
+	m_dataDirection =  m_peTree.InsertItem("Data Direction [x]", m_optionalHeader);
+	m_importDirectory = m_peTree.InsertItem("Import Directory]", m_peFileInfo);
+	m_resDirectory = m_peTree.InsertItem("Resource Directory", m_peFileInfo);
+	m_addrConverter =  m_peTree.InsertItem("Address Converter", m_peFileInfo);
+	m_depWalker =  m_peTree.InsertItem("Dependency Walker", m_peFileInfo);
+	m_hexEditor = m_peTree.InsertItem("Hex Editor", m_peFileInfo);
+	m_identifier = m_peTree.InsertItem("Identifier", m_peFileInfo);
+	m_importAdder = m_peTree.InsertItem("Import Adder", m_peFileInfo);
+	m_quickDisasm = m_peTree.InsertItem("Quick Disassembler", m_peFileInfo);
+	m_rebuilder = m_peTree.InsertItem("Rebuilder", m_peFileInfo);
+	m_resEditor = m_peTree.InsertItem("Resource Editor", m_peFileInfo);
+	m_upx = m_peTree.InsertItem("UPX Utility", m_peFileInfo);
+
+	InitFileInfoDlg();
+	CRect rc;
+	GetClientRect(&rc);
+
+	rc.left += 340;
+	rc.top += 53;
+
+	m_fileInfoDlg.MoveWindow(&rc);
+
+	m_fileInfoDlg.ShowWindow(SW_SHOW);
+
+}
+
+void CpetoolDlg::InitFileInfoDlg()
+{
+	m_fileInfoDlg.Create(DLG_FILE_INFO, this);
 }
 
 
@@ -213,14 +230,19 @@ void CpetoolDlg::OnSelchangedTreePe(NMHDR* pNMHDR, LRESULT* pResult)
 	LPNMTREEVIEW pNMTreeView = reinterpret_cast<LPNMTREEVIEW>(pNMHDR);
 	// TODO: 在此添加控件通知处理程序代码
 	*pResult = 0;
+
 	AfxMessageBox(pNMTreeView->itemNew.pszText);
-	//int nIdx = m_tab.GetCurSel();
-	//m_generalDlg.ShowWindow(SW_HIDE);
+
+	m_fileInfoDlg.ShowWindow(SW_HIDE);
 	//m_styleDlg.ShowWindow(SW_HIDE);
 	//m_winDlg.ShowWindow(SW_HIDE);
 	//m_classDlg.ShowWindow(SW_HIDE);
 	//m_prcessDlg.ShowWindow(SW_HIDE);
 
+	if (pNMTreeView->itemNew.hItem == m_peFileInfo)
+	{
+		m_fileInfoDlg.ShowWindow(SW_SHOW);
+	}
 	//switch (nIdx)
 	//{
 	//case 0:
