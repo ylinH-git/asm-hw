@@ -4,6 +4,8 @@ option casemap :none  ;case sensitive
 
 include global.inc
 
+.data
+	extern g_hProc
 .code 
 ; 获取上下文
 GetContext proc pCtx:ptr CONTEXT, hThread:HANDLE
@@ -22,7 +24,7 @@ SetContext proc pCtx:ptr CONTEXT, hThread:HANDLE
 SetContext endp
 
 
-WriteMemory proc hProc:HANDLE, destAddr:DWORD, sourceAddr:DWORD, memSize: DWORD
+WriteMemory proc destAddr:DWORD, sourceAddr:DWORD, memSize: DWORD
 	LOCAL @dwBytesWriteReaded:DWORD
 	LOCAL @dwOldProject:DWORD
 	

@@ -2,39 +2,13 @@
 .model flat, stdcall  ;32 bit memory model
 option casemap :none  ;case sensitive
 
-include debugger.inc
-
-ACCESS_READ_EXCEPT equ 0 
-ACCESS_WRITE_EXCEPT equ 1
-
-bpStruct struc
-	m_oldCode db 0
-	m_dwAddr  dd 0
-bpStruct ends
-
-.const
-	g_szExe 						db "test.exe", 0
-	g_szSystemBegin 				db "start debugging...", 0dh, 0ah, 0
-    g_szOUTPUT_DEBUG_STRING_EVENT  	db "OUTPUT_DEBUG_STRING_EVENT",0
-    g_szCommandErrTip              	db "命令出错", 0dh, 0ah, 0
-    g_szBpListHeader               	db "序号      断点地址",0dh, 0ah, 0
-   	g_szNoneBpList           		db "没有断点记录",0dh, 0ah, 0
-   	g_szSystemBp					db "命中系统断点:0x", 0
-   	g_szCustomBp					db "命中一般断点:0x", 0
-   	g_szBhTip                       db "命中硬件执行断点 %08X", 0dh, 0ah, 0
-   	g_szBaETip                      db "命中硬件访问断点 %08X", 0dh, 0ah, 0
-   	g_szBaWTip                      db "命中硬件写入断点 %08X", 0dh, 0ah, 0
-   	g_szBmTip                      	db "命中内存写入断点 %08X", 0dh, 0ah, 0
-    g_szFmt                        	db "%s",0dh, 0ah, 0
-    g_szBpFmt                       db "%s%+08X",0dh, 0ah, 0
-    g_szBpListFmt                  	db "%+4u      %+08X",0dh, 0ah, 0
-    g_szAsmFmt                      db "0x%08X %s",0dh, 0ah, 0
-    g_szCurAsmFmt                   db "0x%08X %s <==== ",0dh, 0ah, 0
-    g_szCall    					db "call", 0
+include global.inc
+include disasm.inc
+include utils.inc
 
 .data
+	g_hProc  HANDLE 0
     g_de        DEBUG_EVENT <0>
-    g_hProc     HANDLE 0
     g_szCommand db 256 dup(0)
     g_bIsSysBp  db TRUE
 	g_bpList bpStruct 100 dup(<?>) ;断点数组
@@ -57,22 +31,6 @@ bpStruct ends
     g_dwMmbpLen  dd 0 ;内存断点长度 
     g_dwMmbpOld  dd 0 ;原来的内存保护属性
 .code 
-
-; 获取上下文
-GetContext proc pCtx:ptr CONTEXT, hThread:HANDLE
-    invoke RtlZeroMemory, pCtx, size CONTEXT
-    mov esi, pCtx
-    assume esi:ptr CONTEXT
-    mov [esi].ContextFlags, CONTEXT_FULL or CONTEXT_DEBUG_REGISTERS
-    invoke GetThreadContext, hThread, pCtx
-    ret
-GetContext endp
-
-; 设置上下文
-SetContext proc pCtx:ptr CONTEXT, hThread:HANDLE
-    invoke SetThreadContext, hThread, pCtx
-    ret
-SetContext endp
 
 OutputDebugHandler proc uses ebx
 	LOCAL @szBuf[MAX_PATH]:BYTE
@@ -112,7 +70,6 @@ OutputDebugHandler proc uses ebx
 	ret
 
 OutputDebugHandler endp
-WriteMemory proto destAddr:DWORD, sourceAddr:DWORD, memSize: DWORD
 
 
 GetCurrEip proc
@@ -139,7 +96,7 @@ ClearBpList proc uses ecx ebx edx dwAddr:DWORD
 			push ecx
 			lea ecx, [ebx].m_oldCode
     		;还原指令
-    		invoke WriteMemory, [ebx].m_dwAddr, ecx, 1
+    		invoke WriteMemory, g_hProc, [ebx].m_dwAddr, ecx, 1
 			pop ecx
 			add ebx, size bpStruct
 			inc ecx
@@ -156,7 +113,7 @@ ClearBpList proc uses ecx ebx edx dwAddr:DWORD
 				push ecx
 				lea ecx, [ebx].m_oldCode
     			;还原指令
-    			invoke WriteMemory, [ebx].m_dwAddr, ecx, 1
+    			invoke WriteMemory, g_hProc, [ebx].m_dwAddr, ecx, 1
 				pop ecx
 				invoke RtlZeroMemory, ebx, 5
 				dec g_bpsLen
@@ -216,18 +173,6 @@ FindBp proc uses ecx ebx dwAddr:DWORD
 	ret
 
 FindBp endp
-
-WriteMemory proc destAddr:DWORD, sourceAddr:DWORD, memSize: DWORD
-	LOCAL @dwBytesWriteReaded:DWORD
-	LOCAL @dwOldProject:DWORD
-	
-	invoke VirtualProtect, destAddr, 1, PAGE_EXECUTE_READWRITE,addr @dwOldProject
-	invoke WriteProcessMemory, g_hProc, destAddr, sourceAddr, memSize, addr @dwBytesWriteReaded
-	invoke VirtualProtect, destAddr, 1, @dwOldProject,addr @dwOldProject
-	
-	ret
-
-WriteMemory endp
 
 PrintAsm proc uses ecx pCurBufAsm:DWORD, currDwEip:DWORD, pDwCodeLen:DWORD, asmNum: DWORD
 	LOCAL @bufAsm[64]:BYTE
@@ -323,7 +268,7 @@ SetBp proc uses ecx ebx edx dwAddr:DWORD, dwFlag:DWORD
     .endif
     	;写入CC
     	mov @btCC, 0cch
-    	invoke WriteMemory, dwAddr, addr @btCC, size @btCC
+    	invoke WriteMemory, g_hProc, dwAddr, addr @btCC, size @btCC
     
     ret
 
@@ -336,7 +281,7 @@ SetTFBp proc uses ecx ebx edx dwAddr:DWORD
     
     ;写入CC
     mov @btCC, 0cch
-    invoke WriteMemory, dwAddr, addr @btCC, size @btCC
+    invoke WriteMemory, g_hProc, dwAddr, addr @btCC, size @btCC
     
     ret
 
@@ -353,7 +298,7 @@ RestoreBp proc uses ebx ecx dwAddr:DWORD
     
     lea ecx, [ebx].m_oldCode
     ;还原指令
-    invoke WriteMemory, dwAddr, ecx, 1
+    invoke WriteMemory, g_hProc, dwAddr, ecx, 1
     invoke SetTF
     invoke DecEip
     ret
@@ -368,11 +313,11 @@ RestoreTFBp proc uses ebx ecx
     
     	lea ecx, [ebx].m_oldCode
     	;还原指令
-    	invoke WriteMemory, g_dwTFBpAddr, ecx, 1
+    	invoke WriteMemory, g_hProc, g_dwTFBpAddr, ecx, 1
     	invoke SetTF
     .else
     	;还原指令
-    	invoke WriteMemory, g_dwTFBpAddr, offset g_pTFBpOldCode , 1
+    	invoke WriteMemory, g_hProc, g_dwTFBpAddr, offset g_pTFBpOldCode , 1
     .endif
     invoke DecEip
     mov g_bIsSinglePStep, FALSE

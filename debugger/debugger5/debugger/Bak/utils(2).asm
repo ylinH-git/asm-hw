@@ -5,7 +5,6 @@ option casemap :none  ;case sensitive
 include global.inc
 
 .code 
-
 ; 获取上下文
 GetContext proc pCtx:ptr CONTEXT, hThread:HANDLE
     invoke RtlZeroMemory, pCtx, size CONTEXT
@@ -23,12 +22,12 @@ SetContext proc pCtx:ptr CONTEXT, hThread:HANDLE
 SetContext endp
 
 
-WriteMemory proc destAddr:DWORD, sourceAddr:DWORD, memSize: DWORD
+WriteMemory proc hProc:HANDLE, destAddr:DWORD, sourceAddr:DWORD, memSize: DWORD
 	LOCAL @dwBytesWriteReaded:DWORD
 	LOCAL @dwOldProject:DWORD
 	
 	invoke VirtualProtect, destAddr, 1, PAGE_EXECUTE_READWRITE,addr @dwOldProject
-	invoke WriteProcessMemory, g_hProc, destAddr, sourceAddr, memSize, addr @dwBytesWriteReaded
+	invoke WriteProcessMemory, hProc, destAddr, sourceAddr, memSize, addr @dwBytesWriteReaded
 	invoke VirtualProtect, destAddr, 1, @dwOldProject,addr @dwOldProject
 	
 	ret

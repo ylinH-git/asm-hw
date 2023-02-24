@@ -1,0 +1,1 @@
+OutputDebugHandler uses esi ebx hProc:HANDLE, pDe: DWORD

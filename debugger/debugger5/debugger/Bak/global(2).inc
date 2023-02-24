@@ -21,4 +21,4 @@ bpStruct struc
 bpStruct ends
 
 .data
-    g_hProc  HANDLE 0
+	g_hProc  HANDLE 0

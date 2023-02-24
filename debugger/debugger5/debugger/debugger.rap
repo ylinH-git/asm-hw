@@ -5,6 +5,7 @@ Description=debugger
 Backup=$P\Bak\
 Group=1
 GroupExpand=1
+调试=0
 [Files]
 1=debugger.Asm
 2=debugger.Inc
@@ -12,6 +13,10 @@ GroupExpand=1
 3=utils.inc
 4=global.inc
 5=disasm.inc
+6=utils.obj
+1002=output_debug_handler.asm
+7=output_debug_handler.inc
+8=output_debug_handler.obj
 [MakeFiles]
 0=debugger.rap
 1=debugger.rc
@@ -31,7 +36,7 @@ GroupExpand=1
 15=debugger.tlb
 16=debugger.sys
 [MakeDef]
-Menu=0,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0
+Menu=0,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0
 1=4,O,$B\RC.EXE /v,1
 2=3,O,$B\ML.EXE /c /coff /Cp /nologo /I"$I",2
 3=5,O,$B\LINK.EXE /SUBSYSTEM:CONSOLE /RELEASE /VERSION:4.0 /LIBPATH:"$L" /OUT:"$5",3
@@ -39,6 +44,13 @@ Menu=0,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0
 5=rsrc.obj,O,$B\CVTRES.EXE,rsrc.res
 6=*.obj,O,$B\ML.EXE /c /coff /Cp /nologo /I"$I",*.asm
 7=0,0,"$E\OllyDbg",5
+11=4,O,$B\RC.EXE /v,1
+12=3,O,$B\ML.EXE /c /coff /Cp /Zi /nologo /I"$I",2
+13=5,O,$B\LINK.EXE /SUBSYSTEM:CONSOLE /DEBUG /VERSION:4.0 /LIBPATH:"$L" /OUT:"$5",3
+14=0,0,$D\RunStub,5
+15=rsrc.obj,O,$B\CVTRES.EXE,rsrc.res
+16=*.obj,O,$B\ML.EXE /c /coff /Cp /nologo /I"$I",*.asm
+17=0,0,"$E\OllyDbg",5
 [Group]
 Group=添加的文件,源文件,资源文件,其他,模块
 1=2
@@ -47,6 +59,10 @@ Group=添加的文件,源文件,资源文件,其他,模块
 3=1
 4=1
 5=1
+6=1
+1002=1
+7=1
+8=1
 [VersionControl]
 Settings=1246
 重要事件=129
@@ -92,9 +108,11 @@ ProductVer4Range=0
 [Collapse]
 1=,,
 2=
+7=
 [Size]
 1=0,0,0,0,14114
 2=0,0,0,0,120
+7=0,0,0,0,62
 [BookMark]
 0=
 1=
@@ -109,13 +127,13 @@ ProductVer4Range=0
 [BreakPoint]
 0=
 [Find]
-1="g_hProc"
-2="SetBmCommand"
-3="g_bIsBmSingleStep"
-4="g_bIsBaESingleStep"
-5="SetBaCommand"
-6="SetBhCommand"
-7="g_szBaTip"
-8="g_bIsBaSingleStep"
-9="g_dwTraceEnd"
-10="GetContext"
+1="OutputDebugHandler"
+2="g_"
+3="g_de"
+4="WriteMemory"
+5="g_hProc"
+6="SetBmCommand"
+7="g_bIsBmSingleStep"
+8="g_bIsBaESingleStep"
+9="SetBaCommand"
+10="SetBhCommand"

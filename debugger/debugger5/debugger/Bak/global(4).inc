@@ -19,3 +19,10 @@ bpStruct struc
 	m_oldCode db 0
 	m_dwAddr  dd 0
 bpStruct ends
+
+.data
+    g_hProc  HANDLE 0
+    
+    
+    
+public g_hProc

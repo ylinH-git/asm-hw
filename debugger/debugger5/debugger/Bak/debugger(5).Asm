@@ -2,15 +2,9 @@
 .model flat, stdcall  ;32 bit memory model
 option casemap :none  ;case sensitive
 
-include debugger.inc
-
-ACCESS_READ_EXCEPT equ 0 
-ACCESS_WRITE_EXCEPT equ 1
-
-bpStruct struc
-	m_oldCode db 0
-	m_dwAddr  dd 0
-bpStruct ends
+include global.inc
+include disasm.inc
+include utils.inc
 
 .const
 	g_szExe 						db "test.exe", 0
@@ -33,8 +27,8 @@ bpStruct ends
     g_szCall    					db "call", 0
 
 .data
+	g_hProc  HANDLE 0
     g_de        DEBUG_EVENT <0>
-    g_hProc     HANDLE 0
     g_szCommand db 256 dup(0)
     g_bIsSysBp  db TRUE
 	g_bpList bpStruct 100 dup(<?>) ;断点数组
@@ -57,22 +51,6 @@ bpStruct ends
     g_dwMmbpLen  dd 0 ;内存断点长度 
     g_dwMmbpOld  dd 0 ;原来的内存保护属性
 .code 
-
-; 获取上下文
-GetContext proc pCtx:ptr CONTEXT, hThread:HANDLE
-    invoke RtlZeroMemory, pCtx, size CONTEXT
-    mov esi, pCtx
-    assume esi:ptr CONTEXT
-    mov [esi].ContextFlags, CONTEXT_FULL or CONTEXT_DEBUG_REGISTERS
-    invoke GetThreadContext, hThread, pCtx
-    ret
-GetContext endp
-
-; 设置上下文
-SetContext proc pCtx:ptr CONTEXT, hThread:HANDLE
-    invoke SetThreadContext, hThread, pCtx
-    ret
-SetContext endp
 
 OutputDebugHandler proc uses ebx
 	LOCAL @szBuf[MAX_PATH]:BYTE
@@ -112,7 +90,6 @@ OutputDebugHandler proc uses ebx
 	ret
 
 OutputDebugHandler endp
-WriteMemory proto destAddr:DWORD, sourceAddr:DWORD, memSize: DWORD
 
 
 GetCurrEip proc
@@ -139,7 +116,7 @@ ClearBpList proc uses ecx ebx edx dwAddr:DWORD
 			push ecx
 			lea ecx, [ebx].m_oldCode
     		;还原指令
-    		invoke WriteMemory, [ebx].m_dwAddr, ecx, 1
+    		invoke WriteMemory, g_hProc, [ebx].m_dwAddr, ecx, 1
 			pop ecx
 			add ebx, size bpStruct
 			inc ecx
@@ -156,7 +133,7 @@ ClearBpList proc uses ecx ebx edx dwAddr:DWORD
 				push ecx
 				lea ecx, [ebx].m_oldCode
     			;还原指令
-    			invoke WriteMemory, [ebx].m_dwAddr, ecx, 1
+    			invoke WriteMemory, g_hProc, [ebx].m_dwAddr, ecx, 1
 				pop ecx
 				invoke RtlZeroMemory, ebx, 5
 				dec g_bpsLen
@@ -216,18 +193,6 @@ FindBp proc uses ecx ebx dwAddr:DWORD
 	ret
 
 FindBp endp
-
-WriteMemory proc destAddr:DWORD, sourceAddr:DWORD, memSize: DWORD
-	LOCAL @dwBytesWriteReaded:DWORD
-	LOCAL @dwOldProject:DWORD
-	
-	invoke VirtualProtect, destAddr, 1, PAGE_EXECUTE_READWRITE,addr @dwOldProject
-	invoke WriteProcessMemory, g_hProc, destAddr, sourceAddr, memSize, addr @dwBytesWriteReaded
-	invoke VirtualProtect, destAddr, 1, @dwOldProject,addr @dwOldProject
-	
-	ret
-
-WriteMemory endp
 
 PrintAsm proc uses ecx pCurBufAsm:DWORD, currDwEip:DWORD, pDwCodeLen:DWORD, asmNum: DWORD
 	LOCAL @bufAsm[64]:BYTE
@@ -323,7 +288,7 @@ SetBp proc uses ecx ebx edx dwAddr:DWORD, dwFlag:DWORD
     .endif
     	;写入CC
     	mov @btCC, 0cch
-    	invoke WriteMemory, dwAddr, addr @btCC, size @btCC
+    	invoke WriteMemory, g_hProc, dwAddr, addr @btCC, size @btCC
     
     ret
 
@@ -336,7 +301,7 @@ SetTFBp proc uses ecx ebx edx dwAddr:DWORD
     
     ;写入CC
     mov @btCC, 0cch
-    invoke WriteMemory, dwAddr, addr @btCC, size @btCC
+    invoke WriteMemory, g_hProc, dwAddr, addr @btCC, size @btCC
     
     ret
 
@@ -353,7 +318,7 @@ RestoreBp proc uses ebx ecx dwAddr:DWORD
     
     lea ecx, [ebx].m_oldCode
     ;还原指令
-    invoke WriteMemory, dwAddr, ecx, 1
+    invoke WriteMemory, g_hProc, dwAddr, ecx, 1
     invoke SetTF
     invoke DecEip
     ret
@@ -368,11 +333,11 @@ RestoreTFBp proc uses ebx ecx
     
     	lea ecx, [ebx].m_oldCode
     	;还原指令
-    	invoke WriteMemory, g_dwTFBpAddr, ecx, 1
+    	invoke WriteMemory, g_hProc, g_dwTFBpAddr, ecx, 1
     	invoke SetTF
     .else
     	;还原指令
-    	invoke WriteMemory, g_dwTFBpAddr, offset g_pTFBpOldCode , 1
+    	invoke WriteMemory, g_hProc, g_dwTFBpAddr, offset g_pTFBpOldCode , 1
     .endif
     invoke DecEip
     mov g_bIsSinglePStep, FALSE
@@ -772,7 +737,7 @@ main proc
     
     ;建立调试会话
     invoke CreateProcess, NULL, offset g_szExe, NULL, NULL, FALSE, \
-            DEBUG_ONLY_THIS_PROCESS  or CREATE_NEW_CONSOLE, NULL, NULL, addr @si, addr @pi
+            DEBUG_ONLY_THIS_PROCESS or CREATE_NEW_CONSOLE, NULL, NULL, addr @si, addr @pi
             
     mov eax, @pi.hProcess
     mov g_hProc, eax

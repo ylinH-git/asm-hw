@@ -1,0 +1,1 @@
+OutputDebugHandler proto uses ebx hProc:HANDLE, pDe: DWORD
