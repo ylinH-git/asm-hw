@@ -9,6 +9,9 @@
 #include "CFileHeaderDlg.h"
 #include "COptionalHeaderDlg.h"
 #include "CDataDirectoriesDlg.h"
+#include "CSectionHeaderDlg.h"
+#include "CAddrConvertDlg.h"
+#include "CImportDirectoryDlg.h"
 
 // CpetoolDlg 对话框
 class CpetoolDlg : public CDialogEx
@@ -16,6 +19,7 @@ class CpetoolDlg : public CDialogEx
 // 构造
 public:
 	CpetoolDlg(CWnd* pParent = nullptr);	// 标准构造函数
+	~CpetoolDlg();
 
 // 对话框数据
 #ifdef AFX_DESIGN_TIME
@@ -45,11 +49,16 @@ private:
 	void InitFileHeaderDlg();
 	void InitOptionalHeaderDlg();
 	void InitDataDirectoriesDlg();
+	void InitSectionHeaderDlg();
+	void InitAddrConvertDlg();
+	void InitImportDirectoryDlg();
 	void GetDosStruct();
 	void GetNtStruct();
 	void GetFileHStruct();
 	void GetOptionalStruct();
 	void GetDataDirStruct();
+	void GetSectionHeaders();
+	void GetImportDirectory();
 	void HideAllDlg();
 public:
 	afx_msg void OnBnClickedOpen();
@@ -64,6 +73,7 @@ public:
 	HTREEITEM m_fileHeader;
 	HTREEITEM m_optionalHeader;
 	HTREEITEM m_dataDirectories;
+	HTREEITEM m_sectionHeaders;
 	HTREEITEM m_importDirectory;
 	HTREEITEM m_resDirectory;
 	HTREEITEM m_addrConverter;
@@ -81,4 +91,7 @@ public:
 	CFileHeaderDlg m_fileHeaderDlg;
 	COptionalHeaderDlg m_optionalHeaderDlg;
 	CDataDirectoriesDlg m_dataDirectoriesDlg;
+	CSectionHeaderDlg m_sectionHeaderDlg;
+	CAddrConvertDlg m_addrConverDlg;
+	CImportDirectoryDlg m_importDirectoryDlg;
 };

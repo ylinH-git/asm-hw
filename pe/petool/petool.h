@@ -15,9 +15,11 @@
 	CString memberName = fullName.Mid(LEN); \
 	LIST.InsertItem(ROW, NEEDNAME ? memberName : ""); \
 	CString sOffset; \
-	sOffset.Format("0x%08X", OFFSET); \
+	sOffset.Format("%08X", OFFSET); \
 	LIST.SetItemText(ROW, 1, sOffset); \
 	CString sValue; \
+	if(sizeof(X) == sizeof(ULONGLONG)) \
+	{ sValue.Format("%016X", X); LIST.SetItemText(ROW, 2, "ULONGLONG"); OFFSET+=8;}\
 	if(sizeof(X) > sizeof(short)) \
 	{ sValue.Format("%08X", X); LIST.SetItemText(ROW, 2, "DWORD"); OFFSET+=4;}\
 	else if(sizeof(X) > sizeof(char)) {sValue.Format("%04X", X); LIST.SetItemText(ROW, 2, "WORD"); OFFSET+=2;} \
@@ -39,11 +41,18 @@ public:
 	virtual BOOL InitInstance();
 	FILE* m_pFile = nullptr;
 	ULONG m_ntOffset = 0;
+	ULONG m_optionalOffset = 0;
+	ULONG m_dataDirectoryOffset = 0;
+	ULONG m_sectionHeaderOffset = 0;
+	int m_sectionHeaderLen = 0;
+	int m_dataDirectoryLen = 0;
 	IMAGE_NT_HEADERS m_ntHeader = {};
 	IMAGE_FILE_HEADER m_fileHeader = {};
 	IMAGE_OPTIONAL_HEADER32 m_optional32Header = {};
 	IMAGE_OPTIONAL_HEADER64 m_optional64Header = {};
 	IMAGE_DOS_HEADER m_dosHeaderBuf = {};
+	IMAGE_DATA_DIRECTORY* m_dataDirectoris = nullptr;
+	IMAGE_SECTION_HEADER* m_sectionHeaders = nullptr;
 	bool isx86 = true;
 
 // 实现

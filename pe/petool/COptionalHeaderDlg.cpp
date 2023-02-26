@@ -68,7 +68,7 @@ void COptionalHeaderDlg::InitList()
 
 void COptionalHeaderDlg::RenderListData()
 {
-	ULONG currentOffset = theApp.m_ntOffset + sizeof(theApp.m_ntHeader.Signature) + sizeof(theApp.m_fileHeader);
+	ULONG currentOffset = theApp.m_ntOffset + sizeof(theApp.m_ntHeader.Signature) + sizeof(theApp.m_ntHeader.FileHeader);
 	int currIdx = 0;
 	
 	

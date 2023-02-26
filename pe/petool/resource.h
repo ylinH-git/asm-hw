@@ -16,6 +16,10 @@
 #define DLG_DOS_HEADER3                 134
 #define DLG_OPTIONAL_HEADER             134
 #define DLG_DATA_DIRECTORIES            135
+#define DLG_SECTION_HEADER              136
+#define DLG_ADDR_CONVERT                137
+#define DLG_IMPORT_DIRECTORY            138
+#define DLG_CHANGE_VAL                  139
 #define TREE_PE                         1000
 #define LIST_FILE_MORE_INFO             1009
 #define LIST_FILE_MAIN_INFO             1010
@@ -28,14 +32,24 @@
 #define LIST_FILE_HEADER                1014
 #define LIST_OPTIONAL_HEADER            1015
 #define LIST_DATA_DIRECTORIES           1016
+#define LIST_SECTION_HEADER             1017
+#define LIST_FUNC_LIST                  1017
+#define EDT_VA                          1018
+#define LIST_MODULE_LIST                1019
+#define EDT_RVA                         1020
+#define BTN_OK                          1020
+#define EDT_FA                          1021
+#define IDC_EDIT1                       1021
+#define EDT_OLD                         1021
+#define EDT_NEW                         1022
 
 // Next default values for new objects
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        133
+#define _APS_NEXT_RESOURCE_VALUE        141
 #define _APS_NEXT_COMMAND_VALUE         32771
-#define _APS_NEXT_CONTROL_VALUE         1017
+#define _APS_NEXT_CONTROL_VALUE         1022
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
 #endif

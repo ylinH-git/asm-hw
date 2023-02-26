@@ -57,6 +57,25 @@ CpetoolDlg::CpetoolDlg(CWnd* pParent /*=nullptr*/)
 	m_hIcon = AfxGetApp()->LoadIcon(IDR_MAINFRAME);
 }
 
+CpetoolDlg::~CpetoolDlg()
+{
+	if (theApp.m_pFile) 
+	{
+		fclose(theApp.m_pFile);
+	}
+
+	if (theApp.m_dataDirectoris)
+	{
+		delete[] theApp.m_dataDirectoris;
+	}
+
+	if (theApp.m_sectionHeaders)
+	{
+		delete[] theApp.m_sectionHeaders;
+	}
+
+}
+
 void CpetoolDlg::DoDataExchange(CDataExchange* pDX)
 {
 	CDialogEx::DoDataExchange(pDX);
@@ -110,7 +129,9 @@ BOOL CpetoolDlg::OnInitDialog()
 	InitFileHeaderDlg();
 	InitOptionalHeaderDlg();
 	InitDataDirectoriesDlg();
-
+	InitSectionHeaderDlg();
+	InitImportDirectoryDlg();
+	InitAddrConvertDlg();
 
 	CRect rc;
 	GetClientRect(&rc);
@@ -124,6 +145,9 @@ BOOL CpetoolDlg::OnInitDialog()
 	m_fileHeaderDlg.MoveWindow(&rc);
 	m_optionalHeaderDlg.MoveWindow(&rc);
 	m_dataDirectoriesDlg.MoveWindow(&rc);
+	m_sectionHeaderDlg.MoveWindow(&rc);
+	m_addrConverDlg.MoveWindow(&rc);
+	m_importDirectoryDlg.MoveWindow(&rc);
 	// TODO: 在此添加额外的初始化代码
 	return TRUE;  // 除非将焦点设置到控件，否则返回 TRUE
 }
@@ -186,7 +210,8 @@ void CpetoolDlg::CreatePeTree(CString fileName)
 	m_fileHeader = m_peTree.InsertItem("File Header", m_ntHeader);
 	m_optionalHeader = m_peTree.InsertItem("Optional Header", m_ntHeader);
 	m_dataDirectories =  m_peTree.InsertItem("Data Direction [x]", m_optionalHeader);
-	m_importDirectory = m_peTree.InsertItem("Import Directory]", m_peFileInfo);
+	m_sectionHeaders = m_peTree.InsertItem("Section Headers [X]", m_peFileInfo);
+	m_importDirectory = m_peTree.InsertItem("Import Directory", m_peFileInfo);
 	m_resDirectory = m_peTree.InsertItem("Resource Directory", m_peFileInfo);
 	m_addrConverter =  m_peTree.InsertItem("Address Converter", m_peFileInfo);
 	m_depWalker =  m_peTree.InsertItem("Dependency Walker", m_peFileInfo);
@@ -207,6 +232,7 @@ void CpetoolDlg::CreatePeTree(CString fileName)
 	m_fileHeaderDlg.OnInitDialog();
 	m_optionalHeaderDlg.OnInitDialog();
 	m_dataDirectoriesDlg.OnInitDialog();
+	m_sectionHeaderDlg.OnInitDialog();
 
 }
 
@@ -251,7 +277,8 @@ void CpetoolDlg::GetFileHStruct()
 
 void CpetoolDlg::GetOptionalStruct()
 {
-	fseek(theApp.m_pFile, theApp.m_ntOffset + sizeof(&theApp.m_ntHeader.Signature) + sizeof(&theApp.m_ntHeader.FileHeader), SEEK_SET);
+	theApp.m_optionalOffset = theApp.m_ntOffset + sizeof(theApp.m_ntHeader.Signature) + sizeof(theApp.m_ntHeader.FileHeader);
+	fseek(theApp.m_pFile, theApp.m_optionalOffset, SEEK_SET);
 	if (theApp.isx86)
 	{
 		int op32Len = sizeof(IMAGE_OPTIONAL_HEADER32);
@@ -270,6 +297,32 @@ void CpetoolDlg::GetOptionalStruct()
 
 void CpetoolDlg::GetDataDirStruct()
 {
+	if (theApp.isx86)
+	{
+		theApp.m_dataDirectoryLen = theApp.m_optional32Header.NumberOfRvaAndSizes;
+		theApp.m_dataDirectoryOffset = theApp.m_optionalOffset + 96;
+	}
+	else
+	{
+		theApp.m_dataDirectoryLen = theApp.m_optional64Header.NumberOfRvaAndSizes;
+		theApp.m_dataDirectoryOffset = theApp.m_optionalOffset + 112;
+	}
+	fseek(theApp.m_pFile, theApp.m_dataDirectoryOffset, SEEK_SET);
+	theApp.m_dataDirectoris = new IMAGE_DATA_DIRECTORY[theApp.m_dataDirectoryLen];
+	fread(theApp.m_dataDirectoris, 1, theApp.m_dataDirectoryLen * sizeof(IMAGE_DATA_DIRECTORY), theApp.m_pFile);
+}
+
+void CpetoolDlg::GetSectionHeaders()
+{
+	theApp.m_sectionHeaderOffset = theApp.m_optionalOffset + theApp.m_fileHeader.SizeOfOptionalHeader;
+	fseek(theApp.m_pFile, theApp.m_sectionHeaderOffset, SEEK_SET);
+	theApp.m_sectionHeaderLen = theApp.m_fileHeader.NumberOfSections;
+	theApp.m_sectionHeaders = new IMAGE_SECTION_HEADER[theApp.m_sectionHeaderLen];
+	fread(theApp.m_sectionHeaders, 1, theApp.m_sectionHeaderLen * sizeof(IMAGE_SECTION_HEADER), theApp.m_pFile);
+}
+
+void CpetoolDlg::GetImportDirectory()
+{
 }
 
 void CpetoolDlg::HideAllDlg()
@@ -280,6 +333,9 @@ void CpetoolDlg::HideAllDlg()
 	m_fileHeaderDlg.ShowWindow(SW_HIDE);
 	m_optionalHeaderDlg.ShowWindow(SW_HIDE);
 	m_dataDirectoriesDlg.ShowWindow(SW_HIDE);
+	m_sectionHeaderDlg.ShowWindow(SW_HIDE);
+	m_importDirectoryDlg.ShowWindow(SW_HIDE);
+	m_addrConverDlg.ShowWindow(SW_HIDE);
 }
 
 
@@ -302,6 +358,7 @@ void CpetoolDlg::OnBnClickedOpen()
 			GetFileHStruct();
 			GetOptionalStruct();
 			GetDataDirStruct();
+			GetSectionHeaders();
 			if (!m_bIsInited) {
 				CreatePeTree(m_filePath);
 				m_bIsInited = true;
@@ -374,6 +431,23 @@ void CpetoolDlg::OnSelchangedTreePe(NMHDR* pNMHDR, LRESULT* pResult)
 		return;
 	}
 
+	if (pNMTreeView->itemNew.hItem == m_sectionHeaders)
+	{
+		m_sectionHeaderDlg.ShowWindow(SW_SHOW);
+		return;
+	}
+
+	if (pNMTreeView->itemNew.hItem == m_importDirectory)
+	{
+		m_importDirectoryDlg.ShowWindow(SW_SHOW);
+		return;
+	}
+
+	if (pNMTreeView->itemNew.hItem == m_addrConverter)
+	{
+		m_addrConverDlg.ShowWindow(SW_SHOW);
+		return;
+	}
 }
 
 void CpetoolDlg::InitNtHeadersDlg()
@@ -394,4 +468,19 @@ void CpetoolDlg::InitOptionalHeaderDlg()
 void CpetoolDlg::InitDataDirectoriesDlg()
 {
 	m_dataDirectoriesDlg.Create(DLG_DATA_DIRECTORIES, this);
+}
+
+void CpetoolDlg::InitSectionHeaderDlg()
+{
+	m_sectionHeaderDlg.Create(DLG_SECTION_HEADER, this);
+}
+
+void CpetoolDlg::InitAddrConvertDlg()
+{
+	m_importDirectoryDlg.Create(DLG_IMPORT_DIRECTORY, this);
+}
+
+void CpetoolDlg::InitImportDirectoryDlg()
+{
+	m_addrConverDlg.Create(DLG_ADDR_CONVERT, this);
 }

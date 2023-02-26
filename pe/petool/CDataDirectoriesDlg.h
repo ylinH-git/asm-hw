@@ -24,4 +24,7 @@ protected:
 public:
 	CListCtrl m_dataDirectoriesList;
 	virtual BOOL OnInitDialog();
+	void InitList();
+	void RenderListData();
+	void RefreshListStyle();
 };
