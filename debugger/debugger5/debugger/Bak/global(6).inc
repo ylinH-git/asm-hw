@@ -20,5 +20,5 @@ bpStruct struc
 	m_dwAddr  dd 0
 bpStruct ends
 
-
-    public g_hProc  HANDLE 0
+.data
+	g_hProc  HANDLE 0
