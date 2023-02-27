@@ -60,6 +60,7 @@ public:
 	IMAGE_DATA_DIRECTORY* m_dataDirectoris = nullptr;
 	IMAGE_SECTION_HEADER* m_sectionHeaders = nullptr;
 	IMAGE_IMPORT_DESCRIPTOR* m_importDescriptors = nullptr;
+	ULONG* m_importDllNameFAs = nullptr;
 	bool isx86 = true;
 
 // 实现

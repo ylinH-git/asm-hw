@@ -62,18 +62,32 @@ CpetoolDlg::~CpetoolDlg()
 	if (theApp.m_pFile) 
 	{
 		fclose(theApp.m_pFile);
+		theApp.m_pFile = nullptr;
 	}
 
 	if (theApp.m_dataDirectoris)
 	{
 		delete[] theApp.m_dataDirectoris;
+		theApp.m_dataDirectoris = nullptr;
 	}
 
 	if (theApp.m_sectionHeaders)
 	{
 		delete[] theApp.m_sectionHeaders;
+		theApp.m_sectionHeaders = nullptr;
 	}
 
+	if (theApp.m_importDescriptors)
+	{
+		delete[] theApp.m_importDescriptors;
+		theApp.m_importDescriptors = nullptr;
+	}
+
+	if (theApp.m_importDllNameFAs)
+	{
+		delete[] theApp.m_importDllNameFAs;
+		theApp.m_importDllNameFAs = nullptr;
+	}
 }
 
 void CpetoolDlg::DoDataExchange(CDataExchange* pDX)
@@ -233,17 +247,8 @@ void CpetoolDlg::CreatePeTree(CString fileName)
 	m_optionalHeaderDlg.OnInitDialog();
 	m_dataDirectoriesDlg.OnInitDialog();
 	m_sectionHeaderDlg.OnInitDialog();
+	m_importDirectoryDlg.OnInitDialog();
 
-}
-
-void CpetoolDlg::InitFileInfoDlg()
-{
-	m_fileInfoDlg.Create(DLG_FILE_INFO, this);
-}
-
-void CpetoolDlg::InitDosHeaderDlg()
-{
-	m_dosHeaderDlg.Create(DLG_DOS_HEADER, this);
 }
 
 void CpetoolDlg::GetDosStruct()
@@ -340,6 +345,11 @@ void CpetoolDlg::GetImportDirectory()
 		}
 		theApp.m_importDescriptorLen++;
 	}
+
+	theApp.m_importDescriptors = new IMAGE_IMPORT_DESCRIPTOR[theApp.m_importDescriptorLen];
+	theApp.m_importDllNameFAs = new ULONG[theApp.m_importDescriptorLen];
+	fseek(theApp.m_pFile, theApp.m_importDescriptorFA, SEEK_SET);
+	fread(theApp.m_importDescriptors, 1, importStructLen * theApp.m_importDescriptorLen, theApp.m_pFile);
 
 	delete[] tempImport;
 	delete[] allZero;
@@ -469,6 +479,16 @@ void CpetoolDlg::OnSelchangedTreePe(NMHDR* pNMHDR, LRESULT* pResult)
 		m_addrConverDlg.ShowWindow(SW_SHOW);
 		return;
 	}
+}
+
+void CpetoolDlg::InitFileInfoDlg()
+{
+	m_fileInfoDlg.Create(DLG_FILE_INFO, this);
+}
+
+void CpetoolDlg::InitDosHeaderDlg()
+{
+	m_dosHeaderDlg.Create(DLG_DOS_HEADER, this);
 }
 
 void CpetoolDlg::InitNtHeadersDlg()
