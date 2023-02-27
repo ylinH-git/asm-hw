@@ -44,6 +44,9 @@ public:
 	ULONG m_optionalOffset = 0;
 	ULONG m_dataDirectoryOffset = 0;
 	ULONG m_sectionHeaderOffset = 0;
+	ULONG m_importDescriptorOffset = 0;
+	ULONG m_importDescriptorFA = 0;
+	int m_importDescriptorLen = 0;
 	int m_sectionHeaderLen = 0;
 	int m_dataDirectoryLen = 0;
 	IMAGE_NT_HEADERS m_ntHeader = {};
@@ -53,9 +56,11 @@ public:
 	IMAGE_DOS_HEADER m_dosHeaderBuf = {};
 	IMAGE_DATA_DIRECTORY* m_dataDirectoris = nullptr;
 	IMAGE_SECTION_HEADER* m_sectionHeaders = nullptr;
+	IMAGE_IMPORT_DESCRIPTOR* m_importDescriptors = nullptr;
 	bool isx86 = true;
 
 // 实现
+	ULONG GetRVAtoFA(ULONG rva);
 
 	DECLARE_MESSAGE_MAP()
 };

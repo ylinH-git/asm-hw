@@ -105,3 +105,18 @@ BOOL CpetoolApp::InitInstance()
 	return FALSE;
 }
 
+ULONG CpetoolApp::GetRVAtoFA(ULONG rva)
+{
+	ULONG offset = 0;
+	for (int i = 0; i < m_sectionHeaderLen - 1; i++)
+	{
+		if (rva > m_sectionHeaders[i].VirtualAddress
+			&& rva < m_sectionHeaders[i + 1].VirtualAddress)
+		{
+			offset = rva - m_sectionHeaders[i].VirtualAddress + m_sectionHeaders[i].PointerToRawData;
+			break;
+		}
+	}
+	return offset;
+}
+

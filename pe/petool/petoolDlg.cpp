@@ -323,6 +323,26 @@ void CpetoolDlg::GetSectionHeaders()
 
 void CpetoolDlg::GetImportDirectory()
 {
+	theApp.m_importDescriptorOffset = theApp.m_dataDirectoris[1].VirtualAddress;
+	theApp.m_importDescriptorFA = theApp.GetRVAtoFA(theApp.m_importDescriptorOffset);
+	theApp.m_importDescriptorLen = 0;
+	fseek(theApp.m_pFile, theApp.m_importDescriptorFA, SEEK_SET);
+	int importStructLen = sizeof(IMAGE_IMPORT_DESCRIPTOR);
+	char* tempImport = new char[importStructLen];
+	char* allZero = new char[importStructLen];
+	RtlZeroMemory(allZero, importStructLen);
+	while (1)
+	{
+		fread(tempImport, 1,importStructLen, theApp.m_pFile);
+		if (memcmp(tempImport, allZero, importStructLen) == 0)
+		{
+			break;
+		}
+		theApp.m_importDescriptorLen++;
+	}
+
+	delete[] tempImport;
+	delete[] allZero;
 }
 
 void CpetoolDlg::HideAllDlg()
@@ -359,6 +379,7 @@ void CpetoolDlg::OnBnClickedOpen()
 			GetOptionalStruct();
 			GetDataDirStruct();
 			GetSectionHeaders();
+			GetImportDirectory();
 			if (!m_bIsInited) {
 				CreatePeTree(m_filePath);
 				m_bIsInited = true;
