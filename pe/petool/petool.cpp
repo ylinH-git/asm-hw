@@ -120,3 +120,56 @@ ULONG CpetoolApp::GetRVAtoFA(ULONG rva)
 	return offset;
 }
 
+ULONG CpetoolApp::GetRVAtoVA(ULONG rva)
+{
+	if (theApp.isx86) {
+		return rva + theApp.m_optional32Header.ImageBase;
+	}
+	return rva + theApp.m_optional64Header.ImageBase;
+}
+
+ULONG CpetoolApp::GetFAtoRVA(ULONG fa)
+{
+
+	ULONG offset = 0;
+	for (int i = 0; i < m_sectionHeaderLen - 1; i++)
+	{
+		if (fa > m_sectionHeaders[i].PointerToRawData
+			&& fa < m_sectionHeaders[i + 1].PointerToRawData)
+		{
+			offset = fa - m_sectionHeaders[i].PointerToRawData + m_sectionHeaders[i].VirtualAddress;
+			break;
+		}
+	}
+	return offset;
+}
+
+ULONG CpetoolApp::GetFAtoVA(ULONG fa)
+{
+	ULONG offset = GetFAtoRVA(fa);
+	return GetRVAtoVA(offset);
+}
+
+ULONG CpetoolApp::GetVAtoFA(ULONG va)
+{
+	ULONG offset = GetVAtoRVA(va);
+	return GetRVAtoFA(offset);
+}
+
+ULONG CpetoolApp::GetVAtoRVA(ULONG va)
+{
+	if (theApp.isx86) {
+		return va - theApp.m_optional32Header.ImageBase;
+	}
+	return va - theApp.m_optional64Header.ImageBase;
+}
+
+int CpetoolApp::GetHex(std::string str)
+{
+	int hexNum = 0;
+	std::istringstream iss(str);
+
+	iss >> std::hex >> hexNum;
+	return hexNum;
+}
+

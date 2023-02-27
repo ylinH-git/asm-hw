@@ -5,6 +5,7 @@
 #include "petool.h"
 #include "afxdialogex.h"
 #include "CDosHeaderDlg.h"
+#include "CChangeValDlg.h"
 
 // CDosHeaderDlg 对话框
 #define InsertDosMember(X, IDX, NEEDNAME) { \
@@ -31,6 +32,7 @@ void CDosHeaderDlg::DoDataExchange(CDataExchange* pDX)
 
 
 BEGIN_MESSAGE_MAP(CDosHeaderDlg, CDialogEx)
+	ON_NOTIFY(NM_DBLCLK, LIST_DOS_HEADER, &CDosHeaderDlg::OnDblclkListDosHeader)
 END_MESSAGE_MAP()
 
 
@@ -105,4 +107,39 @@ void CDosHeaderDlg::RefreshListStyle()
 	m_dosHeaderList.SetColumnWidth(1, LVSCW_AUTOSIZE_USEHEADER);
 	m_dosHeaderList.SetColumnWidth(2, LVSCW_AUTOSIZE_USEHEADER);
 	m_dosHeaderList.SetColumnWidth(3, LVSCW_AUTOSIZE_USEHEADER);
+}
+
+
+void CDosHeaderDlg::OnDblclkListDosHeader(NMHDR* pNMHDR, LRESULT* pResult)
+{
+	LPNMITEMACTIVATE pNMItemActivate = reinterpret_cast<LPNMITEMACTIVATE>(pNMHDR);
+	// TODO: 在此添加控件通知处理程序代码
+	*pResult = 0;
+
+	int curItem = m_dosHeaderList.GetSelectionMark();
+	CString curFieldName = m_dosHeaderList.GetItemText(curItem, 0);
+	CString curOffsetStr = m_dosHeaderList.GetItemText(curItem, 1);
+	CString curSize = m_dosHeaderList.GetItemText(curItem, 2);
+	CString curValue = m_dosHeaderList.GetItemText(curItem, 4);
+	CChangeValDlg dlg;
+	dlg.m_fieldName = curFieldName;
+	dlg.m_oldVal = curValue;
+	dlg.m_valOffset = theApp.GetHex(curOffsetStr.GetString());
+	if (curSize == "BYTE")
+	{
+		dlg.m_valSize = 1;
+	}
+	else if(curSize == "WORD")
+	{
+		dlg.m_valSize = 2;
+	}
+	else if (curSize == "DWORD")
+	{
+		dlg.m_valSize = 4;
+	}
+	else if (curSize == "ULONGLONG")
+	{
+		dlg.m_valSize = 8;
+	}
+	dlg.DoModal();
 }

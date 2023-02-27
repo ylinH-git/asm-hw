@@ -9,6 +9,9 @@
 #endif
 
 #include "resource.h"		// 主符号
+#include <iostream>
+#include <string>
+#include <sstream>
 #define Name(X) #X
 #define InsertMember(X, LEN, ROW, LIST, OFFSET, NEEDNAME) { \
 	CString fullName = Name(X); \
@@ -61,6 +64,12 @@ public:
 
 // 实现
 	ULONG GetRVAtoFA(ULONG rva);
+	ULONG GetRVAtoVA(ULONG rva);
+	ULONG GetFAtoRVA(ULONG fa);
+	ULONG GetFAtoVA(ULONG fa);
+	ULONG GetVAtoFA(ULONG va);
+	ULONG GetVAtoRVA(ULONG va);
+	int GetHex(std::string str);
 
 	DECLARE_MESSAGE_MAP()
 };

@@ -25,4 +25,7 @@ public:
 	CString m_vaStr;
 	CString m_rvaStr;
 	CString m_faStr;
+	afx_msg void OnBnClickedVa();
+	afx_msg void OnBnClickedRva();
+	afx_msg void OnBnClickedFa();
 };

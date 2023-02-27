@@ -27,4 +27,5 @@ public:
 	void InitList();
 	void RenderListData();
 	void RefreshListStyle();
+	afx_msg void OnDblclkListDosHeader(NMHDR* pNMHDR, LRESULT* pResult);
 };

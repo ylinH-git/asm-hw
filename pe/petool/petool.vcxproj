@@ -185,6 +185,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="CAddrConvertDlg.h" />
+    <ClInclude Include="CChangeValDlg.h" />
     <ClInclude Include="CDataDirectoriesDlg.h" />
     <ClInclude Include="CDosHeaderDlg.h" />
     <ClInclude Include="CFileHeaderDlg.h" />
@@ -202,6 +203,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="CAddrConvertDlg.cpp" />
+    <ClCompile Include="CChangeValDlg.cpp" />
     <ClCompile Include="CDataDirectoriesDlg.cpp" />
     <ClCompile Include="CDosHeaderDlg.cpp" />
     <ClCompile Include="CFileHeaderDlg.cpp" />
