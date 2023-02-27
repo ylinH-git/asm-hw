@@ -190,6 +190,7 @@
     <ClInclude Include="CDosHeaderDlg.h" />
     <ClInclude Include="CFileHeaderDlg.h" />
     <ClInclude Include="CFileInfoDlg.h" />
+    <ClInclude Include="CImportAddDlg.h" />
     <ClInclude Include="CImportDirectoryDlg.h" />
     <ClInclude Include="CNtHeadersDlg.h" />
     <ClInclude Include="COptionalHeaderDlg.h" />
@@ -208,6 +209,7 @@
     <ClCompile Include="CDosHeaderDlg.cpp" />
     <ClCompile Include="CFileHeaderDlg.cpp" />
     <ClCompile Include="CFileInfoDlg.cpp" />
+    <ClCompile Include="CImportAddDlg.cpp" />
     <ClCompile Include="CImportDirectoryDlg.cpp" />
     <ClCompile Include="CNtHeadersDlg.cpp" />
     <ClCompile Include="COptionalHeaderDlg.cpp" />

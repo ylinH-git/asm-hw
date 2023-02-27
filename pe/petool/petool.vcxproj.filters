@@ -63,6 +63,9 @@
     <ClInclude Include="CChangeValDlg.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="CImportAddDlg.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="petool.cpp">
@@ -102,6 +105,9 @@
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="CChangeValDlg.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="CImportAddDlg.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>

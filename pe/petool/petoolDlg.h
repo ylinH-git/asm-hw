@@ -12,6 +12,7 @@
 #include "CSectionHeaderDlg.h"
 #include "CAddrConvertDlg.h"
 #include "CImportDirectoryDlg.h"
+#include "CImportAddDlg.h"
 
 // CpetoolDlg 对话框
 class CpetoolDlg : public CDialogEx
@@ -52,6 +53,7 @@ private:
 	void InitSectionHeaderDlg();
 	void InitAddrConvertDlg();
 	void InitImportDirectoryDlg();
+	void InitImportAddDlg();
 	void GetDosStruct();
 	void GetNtStruct();
 	void GetFileHStruct();
@@ -94,4 +96,5 @@ public:
 	CSectionHeaderDlg m_sectionHeaderDlg;
 	CAddrConvertDlg m_addrConverDlg;
 	CImportDirectoryDlg m_importDirectoryDlg;
+	CImportAddDlg m_importAddDlg;
 };

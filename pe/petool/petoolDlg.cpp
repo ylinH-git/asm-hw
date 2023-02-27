@@ -146,6 +146,7 @@ BOOL CpetoolDlg::OnInitDialog()
 	InitSectionHeaderDlg();
 	InitImportDirectoryDlg();
 	InitAddrConvertDlg();
+	InitImportAddDlg();
 
 	CRect rc;
 	GetClientRect(&rc);
@@ -162,6 +163,7 @@ BOOL CpetoolDlg::OnInitDialog()
 	m_sectionHeaderDlg.MoveWindow(&rc);
 	m_addrConverDlg.MoveWindow(&rc);
 	m_importDirectoryDlg.MoveWindow(&rc);
+	m_importAddDlg.MoveWindow(&rc);
 	// TODO: 在此添加额外的初始化代码
 	return TRUE;  // 除非将焦点设置到控件，否则返回 TRUE
 }
@@ -366,6 +368,7 @@ void CpetoolDlg::HideAllDlg()
 	m_sectionHeaderDlg.ShowWindow(SW_HIDE);
 	m_importDirectoryDlg.ShowWindow(SW_HIDE);
 	m_addrConverDlg.ShowWindow(SW_HIDE);
+	m_importAddDlg.ShowWindow(SW_HIDE);
 }
 
 
@@ -479,6 +482,12 @@ void CpetoolDlg::OnSelchangedTreePe(NMHDR* pNMHDR, LRESULT* pResult)
 		m_addrConverDlg.ShowWindow(SW_SHOW);
 		return;
 	}
+
+	if (pNMTreeView->itemNew.hItem == m_importAdder)
+	{
+		m_importAddDlg.ShowWindow(SW_SHOW);
+		return;
+	}
 }
 
 void CpetoolDlg::InitFileInfoDlg()
@@ -524,4 +533,9 @@ void CpetoolDlg::InitAddrConvertDlg()
 void CpetoolDlg::InitImportDirectoryDlg()
 {
 	m_addrConverDlg.Create(DLG_ADDR_CONVERT, this);
+}
+
+void CpetoolDlg::InitImportAddDlg()
+{
+	m_importAddDlg.Create(DLG_IMPORT_ADD, this);
 }
