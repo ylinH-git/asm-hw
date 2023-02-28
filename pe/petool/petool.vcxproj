@@ -195,6 +195,7 @@
     <ClInclude Include="CNtHeadersDlg.h" />
     <ClInclude Include="COptionalHeaderDlg.h" />
     <ClInclude Include="CSectionHeaderDlg.h" />
+    <ClInclude Include="CSectionInsertDlg.h" />
     <ClInclude Include="framework.h" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="petool.h" />
@@ -214,6 +215,7 @@
     <ClCompile Include="CNtHeadersDlg.cpp" />
     <ClCompile Include="COptionalHeaderDlg.cpp" />
     <ClCompile Include="CSectionHeaderDlg.cpp" />
+    <ClCompile Include="CSectionInsertDlg.cpp" />
     <ClCompile Include="pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
