@@ -72,6 +72,9 @@
     <ClInclude Include="CExportDirectoryDlg.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="CRelocationDirectoryDlg.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="petool.cpp">
@@ -120,6 +123,9 @@
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="CExportDirectoryDlg.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="CRelocationDirectoryDlg.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>

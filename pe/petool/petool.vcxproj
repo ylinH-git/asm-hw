@@ -195,6 +195,7 @@
     <ClInclude Include="CImportDirectoryDlg.h" />
     <ClInclude Include="CNtHeadersDlg.h" />
     <ClInclude Include="COptionalHeaderDlg.h" />
+    <ClInclude Include="CRelocationDirectoryDlg.h" />
     <ClInclude Include="CSectionHeaderDlg.h" />
     <ClInclude Include="CSectionInsertDlg.h" />
     <ClInclude Include="framework.h" />
@@ -216,6 +217,7 @@
     <ClCompile Include="CImportDirectoryDlg.cpp" />
     <ClCompile Include="CNtHeadersDlg.cpp" />
     <ClCompile Include="COptionalHeaderDlg.cpp" />
+    <ClCompile Include="CRelocationDirectoryDlg.cpp" />
     <ClCompile Include="CSectionHeaderDlg.cpp" />
     <ClCompile Include="CSectionInsertDlg.cpp" />
     <ClCompile Include="pch.cpp">

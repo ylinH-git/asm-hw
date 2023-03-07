@@ -46,23 +46,26 @@ BOOL CExportDirectoryDlg::OnInitDialog()
 	CDialogEx::OnInitDialog();
 
 	// TODO:  在此添加额外的初始化
-	m_exportDirectory.DeleteAllItems();
-	for (int i = 0; i < 4; i++)
-	{
-		m_exportDirectory.DeleteColumn(0);
+	if (theApp.m_exportDescriptorFA) {
+		m_exportDirectory.DeleteAllItems();
+		for (int i = 0; i < 4; i++)
+		{
+			m_exportDirectory.DeleteColumn(0);
 
+		}
+		InitExportDirectoryList();
+		RenderExportDirectoryListData();
+
+		m_funcList.DeleteAllItems();
+		for (int i = 0; i < 5; i++)
+		{
+			m_funcList.DeleteColumn(0);
+
+		}
+		InitFuncList();
+		RenderFuncListData();
 	}
-	InitExportDirectoryList();
-	RenderExportDirectoryListData();
-
-	m_funcList.DeleteAllItems();
-	for (int i = 0; i < 5; i++)
-	{
-		m_funcList.DeleteColumn(0);
-
-	}
-	InitFuncList();
-	RenderFuncListData();
+	
 
 	return TRUE;  // return TRUE unless you set the focus to a control
 	// 异常: OCX 属性页应返回 FALSE

@@ -66,6 +66,8 @@ public:
 	ULONG m_exportFuncsFA = 0;
 	ULONG m_exportNamesFA = 0;
 	ULONG m_exportNameOrdinalsFA = 0;
+	ULONG m_relocationDirectoryFA = 0;
+	ULONG m_relocationDirectoryOffset = 0;
 	int m_importDescriptorLen = 0;
 	int m_sectionHeaderLen = 0;
 	int m_dataDirectoryLen = 0;
@@ -78,6 +80,7 @@ public:
 	IMAGE_DATA_DIRECTORY* m_dataDirectoris = nullptr;
 	IMAGE_SECTION_HEADER* m_sectionHeaders = nullptr;
 	IMAGE_IMPORT_DESCRIPTOR* m_importDescriptors = nullptr;
+	IMAGE_BASE_RELOCATION* m_baseRelocation = nullptr;
 	sExportFunc* m_exportFuncList = nullptr;
 	ULONG* m_importDllNameFAs = nullptr;
 	bool isx86 = true;

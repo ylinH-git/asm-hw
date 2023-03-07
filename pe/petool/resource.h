@@ -23,6 +23,7 @@
 #define DLG_IMPORT_ADD                  140
 #define DLG_SECTION_INSERT              141
 #define DLG_EXPORT_DIRECTORY            142
+#define DLG_RELOCATION_DIRECTORY        143
 #define TREE_PE                         1000
 #define LIST_FILE_MORE_INFO             1009
 #define LIST_FILE_MAIN_INFO             1010
@@ -90,6 +91,8 @@
 #define LIST_EXPORT_DIRECTORY           1036
 #define IDC_EDIT14                      1037
 #define EDT_EXTEND_ASM                  1037
+#define LIST_BASE_RELOCATIONS           1037
+#define LIST_RELOC_ADDR                 1038
 
 // Next default values for new objects
 // 
@@ -97,7 +100,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        142
 #define _APS_NEXT_COMMAND_VALUE         32771
-#define _APS_NEXT_CONTROL_VALUE         1037
+#define _APS_NEXT_CONTROL_VALUE         1039
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
 #endif
