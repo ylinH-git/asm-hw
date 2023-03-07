@@ -188,6 +188,7 @@
     <ClInclude Include="CChangeValDlg.h" />
     <ClInclude Include="CDataDirectoriesDlg.h" />
     <ClInclude Include="CDosHeaderDlg.h" />
+    <ClInclude Include="CExportDirectoryDlg.h" />
     <ClInclude Include="CFileHeaderDlg.h" />
     <ClInclude Include="CFileInfoDlg.h" />
     <ClInclude Include="CImportAddDlg.h" />
@@ -208,6 +209,7 @@
     <ClCompile Include="CChangeValDlg.cpp" />
     <ClCompile Include="CDataDirectoriesDlg.cpp" />
     <ClCompile Include="CDosHeaderDlg.cpp" />
+    <ClCompile Include="CExportDirectoryDlg.cpp" />
     <ClCompile Include="CFileHeaderDlg.cpp" />
     <ClCompile Include="CFileInfoDlg.cpp" />
     <ClCompile Include="CImportAddDlg.cpp" />

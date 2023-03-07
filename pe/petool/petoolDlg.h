@@ -14,6 +14,7 @@
 #include "CImportDirectoryDlg.h"
 #include "CImportAddDlg.h"
 #include "CSectionInsertDlg.h"
+#include "CExportDirectoryDlg.h"
 
 // CpetoolDlg 对话框
 class CpetoolDlg : public CDialogEx
@@ -56,6 +57,7 @@ private:
 	void InitImportDirectoryDlg();
 	void InitImportAddDlg();
 	void InitSectionInsertDlg();
+	void InitExportDirectoryDlg();
 	void GetDosStruct();
 	void GetNtStruct();
 	void GetFileHStruct();
@@ -63,6 +65,7 @@ private:
 	void GetDataDirStruct();
 	void GetSectionHeaders();
 	void GetImportDirectory();
+	void GetExportDirectory();
 	void HideAllDlg();
 public:
 	afx_msg void OnBnClickedOpen();
@@ -90,6 +93,7 @@ public:
 	HTREEITEM m_resEditor;
 	HTREEITEM m_upx;
 	HTREEITEM m_secctionInsert;
+	HTREEITEM m_exportDirectory;
 	CFileInfoDlg m_fileInfoDlg;
 	CDosHeaderDlg m_dosHeaderDlg;
 	CNtHeadersDlg m_ntHeaderDlg;
@@ -101,4 +105,5 @@ public:
 	CImportDirectoryDlg m_importDirectoryDlg;
 	CImportAddDlg m_importAddDlg;
 	CSectionInsertDlg m_sectionInsertDlg;
+	CExportDirectoryDlg m_exportDirectoryDlg;
 };

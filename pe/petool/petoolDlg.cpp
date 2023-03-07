@@ -88,6 +88,12 @@ CpetoolDlg::~CpetoolDlg()
 		delete[] theApp.m_importDllNameFAs;
 		theApp.m_importDllNameFAs = nullptr;
 	}
+
+	if (theApp.m_exportFuncList)
+	{
+		delete[] theApp.m_exportFuncList;
+		theApp.m_exportFuncList = nullptr;
+	}
 }
 
 void CpetoolDlg::DoDataExchange(CDataExchange* pDX)
@@ -148,6 +154,7 @@ BOOL CpetoolDlg::OnInitDialog()
 	InitAddrConvertDlg();
 	InitImportAddDlg();
 	InitSectionInsertDlg();
+	InitExportDirectoryDlg();
 
 	CRect rc;
 	GetClientRect(&rc);
@@ -166,6 +173,7 @@ BOOL CpetoolDlg::OnInitDialog()
 	m_importDirectoryDlg.MoveWindow(&rc);
 	m_importAddDlg.MoveWindow(&rc);
 	m_sectionInsertDlg.MoveWindow(&rc);
+	m_exportDirectoryDlg.MoveWindow(&rc);
 	// TODO: 在此添加额外的初始化代码
 	return TRUE;  // 除非将焦点设置到控件，否则返回 TRUE
 }
@@ -229,6 +237,7 @@ void CpetoolDlg::CreatePeTree(CString fileName)
 	m_optionalHeader = m_peTree.InsertItem("Optional Header", m_ntHeader);
 	m_dataDirectories =  m_peTree.InsertItem("Data Direction [x]", m_optionalHeader);
 	m_sectionHeaders = m_peTree.InsertItem("Section Headers [X]", m_peFileInfo);
+	m_exportDirectory = m_peTree.InsertItem("Export Directory", m_peFileInfo);
 	m_importDirectory = m_peTree.InsertItem("Import Directory", m_peFileInfo);
 	m_resDirectory = m_peTree.InsertItem("Resource Directory", m_peFileInfo);
 	m_addrConverter =  m_peTree.InsertItem("Address Converter", m_peFileInfo);
@@ -254,6 +263,7 @@ void CpetoolDlg::CreatePeTree(CString fileName)
 	m_sectionHeaderDlg.OnInitDialog();
 	m_importDirectoryDlg.OnInitDialog();
 	m_sectionInsertDlg.OnInitDialog();
+	m_exportDirectoryDlg.OnInitDialog();
 }
 
 void CpetoolDlg::GetDosStruct()
@@ -360,6 +370,58 @@ void CpetoolDlg::GetImportDirectory()
 	delete[] allZero;
 }
 
+void CpetoolDlg::GetExportDirectory()
+{
+	theApp.m_exportDescriptorOffset = theApp.m_dataDirectoris[0].VirtualAddress;
+	theApp.m_exportDescriptorFA = theApp.GetRVAtoFA(theApp.m_exportDescriptorOffset);
+	fseek(theApp.m_pFile, theApp.m_exportDescriptorFA, SEEK_SET);
+	fread(&theApp.m_exportDirectory, 1, sizeof(IMAGE_EXPORT_DIRECTORY), theApp.m_pFile);
+	
+	theApp.m_exportFuncsFA = theApp.GetRVAtoFA(theApp.m_exportDirectory.AddressOfFunctions);
+	theApp.m_exportNamesFA = theApp.GetRVAtoFA(theApp.m_exportDirectory.AddressOfNames);
+	theApp.m_exportNameOrdinalsFA = theApp.GetRVAtoFA(theApp.m_exportDirectory.AddressOfNameOrdinals);
+	theApp.m_exportFuncList = new sExportFunc[theApp.m_exportDirectory.NumberOfFunctions];
+	RtlZeroMemory(theApp.m_exportFuncList, theApp.m_exportDirectory.NumberOfFunctions * sizeof(sExportFunc));
+	DWORD* funcAddrList = new DWORD[theApp.m_exportDirectory.NumberOfFunctions];
+	fseek(theApp.m_pFile, theApp.m_exportFuncsFA, SEEK_SET);
+	fread(funcAddrList, 1, sizeof(DWORD) * theApp.m_exportDirectory.NumberOfFunctions, theApp.m_pFile);
+	DWORD* namesAddrList = new DWORD[theApp.m_exportDirectory.NumberOfNames];
+	fseek(theApp.m_pFile, theApp.m_exportNamesFA, SEEK_SET);
+	fread(namesAddrList, 1, sizeof(DWORD) * theApp.m_exportDirectory.NumberOfNames, theApp.m_pFile);
+	WORD* ordinalList = new WORD[theApp.m_exportDirectory.NumberOfNames];
+	fseek(theApp.m_pFile, theApp.m_exportNameOrdinalsFA, SEEK_SET);
+	fread(ordinalList, 1, sizeof(WORD) * theApp.m_exportDirectory.NumberOfNames, theApp.m_pFile);
+	for (int i = 0; i < theApp.m_exportDirectory.NumberOfFunctions; i++)
+	{
+		theApp.m_exportFuncList[i].m_ordinal = theApp.m_exportDirectory.Base + i;
+		theApp.m_exportFuncList[i].m_funcRvaOffset = theApp.m_exportFuncsFA + i * sizeof(DWORD);
+		theApp.m_exportFuncList[i].m_funcRva = funcAddrList[i];
+	}
+
+	for (int i = 0; i < theApp.m_exportDirectory.NumberOfNames; i++)
+	{
+		theApp.m_exportFuncList[ordinalList[i]].m_nameOrdinalOffset = theApp.m_exportNameOrdinalsFA + i * sizeof(WORD);
+		theApp.m_exportFuncList[ordinalList[i]].m_nameOffset = theApp.m_exportNamesFA + i * sizeof(DWORD);
+		theApp.m_exportFuncList[ordinalList[i]].m_nameOrdinal = ordinalList[i];
+		theApp.m_exportFuncList[ordinalList[i]].m_nameRva = namesAddrList[i];
+		theApp.m_exportFuncList[ordinalList[i]].m_nameFa = theApp.GetRVAtoFA(namesAddrList[i]);
+		fseek(theApp.m_pFile, theApp.m_exportFuncList[ordinalList[i]].m_nameFa, SEEK_SET);
+		char curChar = fgetc(theApp.m_pFile);
+		int sIdx = 0;
+		while (curChar != 0)
+		{
+			theApp.m_exportFuncList[ordinalList[i]].m_name[sIdx] = curChar;
+			sIdx++;
+			curChar = fgetc(theApp.m_pFile);
+		}
+		theApp.m_exportFuncList[ordinalList[i]].m_name[sIdx] = 0;
+	}
+
+	delete[] funcAddrList;
+	delete[] namesAddrList;
+	delete[] ordinalList;
+}
+
 void CpetoolDlg::HideAllDlg()
 {
 	m_fileInfoDlg.ShowWindow(SW_HIDE);
@@ -373,6 +435,7 @@ void CpetoolDlg::HideAllDlg()
 	m_addrConverDlg.ShowWindow(SW_HIDE);
 	m_importAddDlg.ShowWindow(SW_HIDE);
 	m_sectionInsertDlg.ShowWindow(SW_HIDE);
+	m_exportDirectoryDlg.ShowWindow(SW_HIDE);
 }
 
 
@@ -397,6 +460,7 @@ void CpetoolDlg::OnBnClickedOpen()
 			GetDataDirStruct();
 			GetSectionHeaders();
 			GetImportDirectory();
+			GetExportDirectory();
 			if (!m_bIsInited) {
 				CreatePeTree(m_filePath);
 				m_bIsInited = true;
@@ -498,6 +562,12 @@ void CpetoolDlg::OnSelchangedTreePe(NMHDR* pNMHDR, LRESULT* pResult)
 		m_sectionInsertDlg.ShowWindow(SW_SHOW);
 		return;
 	}
+
+	if (pNMTreeView->itemNew.hItem == m_exportDirectory)
+	{
+		m_exportDirectoryDlg.ShowWindow(SW_SHOW);
+		return;
+	}
 }
 
 void CpetoolDlg::InitFileInfoDlg()
@@ -553,4 +623,9 @@ void CpetoolDlg::InitImportAddDlg()
 void CpetoolDlg::InitSectionInsertDlg()
 {
 	m_sectionInsertDlg.Create(DLG_SECTION_INSERT, this);
+}
+
+void CpetoolDlg::InitExportDirectoryDlg()
+{
+	m_exportDirectoryDlg.Create(DLG_EXPORT_DIRECTORY, this);
 }

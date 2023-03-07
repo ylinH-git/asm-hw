@@ -30,6 +30,18 @@
 	LIST.SetItemText(ROW, 3, sValue); \
 }
 
+struct sExportFunc {
+	DWORD m_ordinal;
+	DWORD m_funcRva;
+	WORD m_nameOrdinal;
+	DWORD m_nameRva;
+	ULONG m_funcRvaOffset;
+	ULONG m_nameOrdinalOffset;
+	ULONG m_nameOffset;
+	ULONG m_nameFa;
+	char m_name[255];
+};
+
 // CpetoolApp:
 // 有关此类的实现，请参阅 petool.cpp
 //
@@ -49,6 +61,11 @@ public:
 	ULONG m_sectionHeaderOffset = 0;
 	ULONG m_importDescriptorOffset = 0;
 	ULONG m_importDescriptorFA = 0;
+	ULONG m_exportDescriptorOffset = 0;
+	ULONG m_exportDescriptorFA = 0;
+	ULONG m_exportFuncsFA = 0;
+	ULONG m_exportNamesFA = 0;
+	ULONG m_exportNameOrdinalsFA = 0;
 	int m_importDescriptorLen = 0;
 	int m_sectionHeaderLen = 0;
 	int m_dataDirectoryLen = 0;
@@ -57,9 +74,11 @@ public:
 	IMAGE_OPTIONAL_HEADER32 m_optional32Header = {};
 	IMAGE_OPTIONAL_HEADER64 m_optional64Header = {};
 	IMAGE_DOS_HEADER m_dosHeaderBuf = {};
+	IMAGE_EXPORT_DIRECTORY m_exportDirectory = {};
 	IMAGE_DATA_DIRECTORY* m_dataDirectoris = nullptr;
 	IMAGE_SECTION_HEADER* m_sectionHeaders = nullptr;
 	IMAGE_IMPORT_DESCRIPTOR* m_importDescriptors = nullptr;
+	sExportFunc* m_exportFuncList = nullptr;
 	ULONG* m_importDllNameFAs = nullptr;
 	bool isx86 = true;
 
