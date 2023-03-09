@@ -43,5 +43,40 @@ END_MESSAGE_MAP()
 
 void CChangeValDlg::OnBnClickedOk()
 {
+	UpdateData(TRUE);
+	if (m_newVal.IsEmpty()) 
+	{
+		AfxMessageBox("新值不许为空");
+		return;
+	}
+
+	fseek(theApp.m_pFile, m_valOffset, SEEK_SET);
+	switch (m_valSize)
+	{
+	case 1:
+	{
+		BYTE bVal = theApp.GetHex(m_newVal.GetString());
+		fwrite(&bVal, 1, sizeof(BYTE), theApp.m_pFile);
+		break;
+	}
+	case 2:
+	{
+		WORD wVal = theApp.GetHex(m_newVal.GetString());
+		fwrite(&wVal, 1, sizeof(WORD), theApp.m_pFile);
+		break;
+	}
+	case 4:
+	{
+		DWORD dwVal = theApp.GetHex(m_newVal.GetString());
+		fwrite(&dwVal, 1, sizeof(DWORD), theApp.m_pFile);
+		break;
+	}
+	case 8:
+	{
+		ULONGLONG ullVal = theApp.GetHex(m_newVal.GetString());
+		fwrite(&ullVal, 1, sizeof(ULONGLONG), theApp.m_pFile);
+		break;
+	}
+	}
 	
 }

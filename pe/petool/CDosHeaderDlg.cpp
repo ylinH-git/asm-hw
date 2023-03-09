@@ -120,7 +120,7 @@ void CDosHeaderDlg::OnDblclkListDosHeader(NMHDR* pNMHDR, LRESULT* pResult)
 	CString curFieldName = m_dosHeaderList.GetItemText(curItem, 0);
 	CString curOffsetStr = m_dosHeaderList.GetItemText(curItem, 1);
 	CString curSize = m_dosHeaderList.GetItemText(curItem, 2);
-	CString curValue = m_dosHeaderList.GetItemText(curItem, 4);
+	CString curValue = m_dosHeaderList.GetItemText(curItem, 3);
 	CChangeValDlg dlg;
 	dlg.m_fieldName = curFieldName;
 	dlg.m_oldVal = curValue;

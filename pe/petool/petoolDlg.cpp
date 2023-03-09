@@ -100,6 +100,12 @@ CpetoolDlg::~CpetoolDlg()
 		delete[] theApp.m_baseRelocation;
 		theApp.m_baseRelocation = nullptr;
 	}
+
+	if (theApp.m_tlsValList)
+	{
+		delete[] theApp.m_tlsValList;
+		theApp.m_tlsValList = nullptr;
+	}
 }
 
 void CpetoolDlg::DoDataExchange(CDataExchange* pDX)
@@ -162,6 +168,7 @@ BOOL CpetoolDlg::OnInitDialog()
 	InitSectionInsertDlg();
 	InitExportDirectoryDlg();
 	InitRelocationDirectoryDlg();
+	InitTlsDlg();
 
 	CRect rc;
 	GetClientRect(&rc);
@@ -182,6 +189,7 @@ BOOL CpetoolDlg::OnInitDialog()
 	m_sectionInsertDlg.MoveWindow(&rc);
 	m_exportDirectoryDlg.MoveWindow(&rc);
 	m_relocationDirectoryDlg.MoveWindow(&rc);
+	m_tlsDlg.MoveWindow(&rc);
 	// TODO: 在此添加额外的初始化代码
 	return TRUE;  // 除非将焦点设置到控件，否则返回 TRUE
 }
@@ -249,6 +257,7 @@ void CpetoolDlg::CreatePeTree(CString fileName)
 	m_importDirectory = m_peTree.InsertItem("Import Directory", m_peFileInfo);
 	m_resDirectory = m_peTree.InsertItem("Resource Directory", m_peFileInfo);
 	m_relocationDirectory = m_peTree.InsertItem("Relocation Directory", m_peFileInfo);
+	m_tlsDirectory = m_peTree.InsertItem("TLS Directory", m_peFileInfo);
 	m_addrConverter =  m_peTree.InsertItem("Address Converter", m_peFileInfo);
 	m_depWalker =  m_peTree.InsertItem("Dependency Walker", m_peFileInfo);
 	m_hexEditor = m_peTree.InsertItem("Hex Editor", m_peFileInfo);
@@ -274,6 +283,7 @@ void CpetoolDlg::CreatePeTree(CString fileName)
 	m_sectionInsertDlg.OnInitDialog();
 	m_exportDirectoryDlg.OnInitDialog();
 	m_relocationDirectoryDlg.OnInitDialog();
+	m_tlsDlg.OnInitDialog();
 }
 
 void CpetoolDlg::GetDosStruct()
@@ -455,6 +465,24 @@ void CpetoolDlg::GetRelocationDirectory()
 	fread(theApp.m_baseRelocation, 1, theApp.m_dataDirectoris[5].Size, theApp.m_pFile);
 }
 
+void CpetoolDlg::GetTlsDirectory()
+{
+	if (theApp.m_dataDirectoris[9].VirtualAddress) 
+	{
+		theApp.m_tlsDirectoryFA = theApp.GetRVAtoFA(theApp.m_dataDirectoris[9].VirtualAddress);
+		fseek(theApp.m_pFile, theApp.m_tlsDirectoryFA, SEEK_SET);
+		fread(&theApp.m_tlsDirectory, 1, sizeof(IMAGE_TLS_DIRECTORY), theApp.m_pFile);
+		if (theApp.m_tlsDirectory.StartAddressOfRawData) {
+			theApp.m_tlsValFA = theApp.GetVAtoFA(theApp.m_tlsDirectory.StartAddressOfRawData);
+			int valListLen = (theApp.m_tlsDirectory.EndAddressOfRawData - theApp.m_tlsDirectory.StartAddressOfRawData);
+			theApp.m_tlsValListNum = valListLen / 4;
+			theApp.m_tlsValList = new DWORD[valListLen];
+			fseek(theApp.m_pFile, theApp.m_tlsValFA, SEEK_SET);
+			fread(theApp.m_tlsValList, 1, valListLen, theApp.m_pFile);
+		}
+	}
+}
+
 void CpetoolDlg::HideAllDlg()
 {
 	m_fileInfoDlg.ShowWindow(SW_HIDE);
@@ -470,6 +498,7 @@ void CpetoolDlg::HideAllDlg()
 	m_sectionInsertDlg.ShowWindow(SW_HIDE);
 	m_exportDirectoryDlg.ShowWindow(SW_HIDE);
 	m_relocationDirectoryDlg.ShowWindow(SW_HIDE);
+	m_tlsDlg.ShowWindow(SW_HIDE);
 }
 
 
@@ -484,7 +513,7 @@ void CpetoolDlg::OnBnClickedOpen()
 		{
 			fclose(theApp.m_pFile);
 		}
-		bool bRet = fopen_s(&theApp.m_pFile, m_filePath.GetString(), "rb");
+		bool bRet = fopen_s(&theApp.m_pFile, m_filePath.GetString(), "rb+");
 		if (!bRet)
 		{
 			GetDosStruct();
@@ -496,6 +525,7 @@ void CpetoolDlg::OnBnClickedOpen()
 			GetImportDirectory();
 			GetExportDirectory();
 			GetRelocationDirectory();
+			GetTlsDirectory();
 			if (!m_bIsInited) {
 				CreatePeTree(m_filePath);
 				m_bIsInited = true;
@@ -609,6 +639,12 @@ void CpetoolDlg::OnSelchangedTreePe(NMHDR* pNMHDR, LRESULT* pResult)
 		m_relocationDirectoryDlg.ShowWindow(SW_SHOW);
 		return;
 	}
+
+	if (pNMTreeView->itemNew.hItem == m_tlsDirectory)
+	{
+		m_tlsDlg.ShowWindow(SW_SHOW);
+		return;
+	}
 }
 
 void CpetoolDlg::InitFileInfoDlg()
@@ -674,4 +710,9 @@ void CpetoolDlg::InitExportDirectoryDlg()
 void CpetoolDlg::InitRelocationDirectoryDlg()
 {
 	m_relocationDirectoryDlg.Create(DLG_RELOCATION_DIRECTORY, this);
+}
+
+void CpetoolDlg::InitTlsDlg()
+{
+	m_tlsDlg.Create(DLG_TLS, this);
 }

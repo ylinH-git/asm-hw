@@ -110,8 +110,14 @@ ULONG CpetoolApp::GetRVAtoFA(ULONG rva)
 	ULONG offset = 0;
 	for (int i = 0; i < m_sectionHeaderLen - 1; i++)
 	{
-		if (rva > m_sectionHeaders[i].VirtualAddress
+		if (rva >= m_sectionHeaders[i].VirtualAddress
 			&& rva < m_sectionHeaders[i + 1].VirtualAddress)
+		{
+			offset = rva - m_sectionHeaders[i].VirtualAddress + m_sectionHeaders[i].PointerToRawData;
+			break;
+		}
+
+		if (rva >= theApp.m_sectionHeaders[theApp.m_sectionHeaderLen - 1].VirtualAddress)
 		{
 			offset = rva - m_sectionHeaders[i].VirtualAddress + m_sectionHeaders[i].PointerToRawData;
 			break;
@@ -164,9 +170,9 @@ ULONG CpetoolApp::GetVAtoRVA(ULONG va)
 	return va - theApp.m_optional64Header.ImageBase;
 }
 
-int CpetoolApp::GetHex(std::string str)
+ULONGLONG CpetoolApp::GetHex(std::string str)
 {
-	int hexNum = 0;
+	ULONGLONG hexNum = 0;
 	std::istringstream iss(str);
 
 	iss >> std::hex >> hexNum;

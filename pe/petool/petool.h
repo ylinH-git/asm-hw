@@ -68,20 +68,25 @@ public:
 	ULONG m_exportNameOrdinalsFA = 0;
 	ULONG m_relocationDirectoryFA = 0;
 	ULONG m_relocationDirectoryOffset = 0;
+	ULONG m_tlsDirectoryFA = 0;
+	ULONG m_tlsValFA = 0;
 	int m_importDescriptorLen = 0;
 	int m_sectionHeaderLen = 0;
 	int m_dataDirectoryLen = 0;
+	int m_tlsValListNum = 0;
 	IMAGE_NT_HEADERS m_ntHeader = {};
 	IMAGE_FILE_HEADER m_fileHeader = {};
 	IMAGE_OPTIONAL_HEADER32 m_optional32Header = {};
 	IMAGE_OPTIONAL_HEADER64 m_optional64Header = {};
 	IMAGE_DOS_HEADER m_dosHeaderBuf = {};
 	IMAGE_EXPORT_DIRECTORY m_exportDirectory = {};
+	IMAGE_TLS_DIRECTORY m_tlsDirectory = {};
 	IMAGE_DATA_DIRECTORY* m_dataDirectoris = nullptr;
 	IMAGE_SECTION_HEADER* m_sectionHeaders = nullptr;
 	IMAGE_IMPORT_DESCRIPTOR* m_importDescriptors = nullptr;
 	IMAGE_BASE_RELOCATION* m_baseRelocation = nullptr;
 	sExportFunc* m_exportFuncList = nullptr;
+	DWORD* m_tlsValList = nullptr;
 	ULONG* m_importDllNameFAs = nullptr;
 	bool isx86 = true;
 
@@ -92,7 +97,7 @@ public:
 	ULONG GetFAtoVA(ULONG fa);
 	ULONG GetVAtoFA(ULONG va);
 	ULONG GetVAtoRVA(ULONG va);
-	int GetHex(std::string str);
+	ULONGLONG GetHex(std::string str);
 
 	DECLARE_MESSAGE_MAP()
 };
