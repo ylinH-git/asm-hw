@@ -1,0 +1,1 @@
+OutputDebugHandler proto hProc:HANDLE, pDe: DWORD
