@@ -52,7 +52,7 @@ GetCurrEip proc uses esi pDe:DWORD
 
 GetCurrEip endp
 
-PrintAsm proc uses ecx hProc:HANDLE, pCurBufAsm:DWORD, currDwEip:DWORD, pDwCodeLen:DWORD, asmNum: DWORD
+PrintAsm proc uses ecx ebx hProc:HANDLE, pCurBufAsm:DWORD, currDwEip:DWORD, pDwCodeLen:DWORD, asmNum: DWORD
 	LOCAL @bufAsm[64]:BYTE
     LOCAL @bufCode[16]:BYTE
     LOCAL @dwEip:DWORD
@@ -70,7 +70,8 @@ PrintAsm proc uses ecx hProc:HANDLE, pCurBufAsm:DWORD, currDwEip:DWORD, pDwCodeL
     	pop ecx
     	mov @dwLastCodeLen, eax
     	.if ecx == 0
-    		mov [pDwCodeLen], eax
+    		mov ebx, pDwCodeLen
+    		mov [ebx], eax
     		push ecx
     		invoke crt_strcpy, pCurBufAsm, addr @bufAsm
     		invoke crt_printf, offset g_szCurAsmFmt, currDwEip, pCurBufAsm	

@@ -1,0 +1,1 @@
+SetBmCommand proto hProc:HANDLE, mmBpAddr:DWORD, mmBpLen:DWORD, pMmbpOld:DWORD

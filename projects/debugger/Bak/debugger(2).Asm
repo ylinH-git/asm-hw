@@ -9,6 +9,8 @@ include output_debug_handler.inc
 include bp_handler.inc
 include t_p_handler.inc
 include ba_handler.inc
+include bh_handler.inc
+include bm_handler.inc
 
 .data
 	g_hProc  HANDLE 0
@@ -32,41 +34,6 @@ include ba_handler.inc
     g_dwMmbpLen  dd 0 ;内存断点长度 
     g_dwMmbpOld  dd 0 ;原来的内存保护属性
 .code 
-
-
-SetBhCommand proc dwAddr:DWORD
-    LOCAL @ctx:CONTEXT
-    LOCAL @hThread:HANDLE
-
-    invoke OpenThread,THREAD_ALL_ACCESS,FALSE, g_de.dwThreadId
-    mov @hThread, eax
-    
-    invoke GetContext, addr @ctx, @hThread
-    
-    mov eax, dwAddr
-    mov @ctx.iDr0, eax
-    
-    
-	; 硬件访问断点
-    or @ctx.iDr7, 1;
-    and @ctx.iDr7, 0fff0ffffh
-    
-    invoke SetContext, addr @ctx, @hThread
-    invoke CloseHandle, @hThread
-   
-    
-    ret
-
-SetBhCommand endp
-
-SetBmCommand proc
-    
-    ;修改内存属性为不可访问
-    invoke VirtualProtectEx, g_hProc, g_dwMmbpAddr, g_dwMmbpLen, PAGE_NOACCESS, offset g_dwMmbpOld
-    
-    ret
-
-SetBmCommand endp
 
 InputCommand proc uses ebx ecx
     LOCAL @bufAsm[64]:BYTE
@@ -163,7 +130,7 @@ InputCommand proc uses ebx ecx
                 .continue
             .endif
             mov @pAddr, eax
-            invoke SetBaCommand, @pAddr, @bIsBaE, @dwBaLen, offset g_pe
+            invoke SetBaCommand, @pAddr, @bIsBaE, @dwBaLen, offset g_de
             
          .elseif g_szCommand[0] == 'b' && g_szCommand[1] == 'h'
         	mov g_bIsBhSingleStep, TRUE
@@ -177,7 +144,8 @@ InputCommand proc uses ebx ecx
             .endif
             
             ;设置断点
-            invoke SetBhCommand, eax
+            mov @pAddr, eax 
+            invoke SetBhCommand, @pAddr, offset g_de
        	.elseif g_szCommand[0] == 'b' && g_szCommand[1] == 'm'
             invoke crt_strtoul, offset g_szCommand + 3, NULL, 16
             .if eax == 0 || eax == -1

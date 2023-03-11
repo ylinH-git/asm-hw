@@ -94,7 +94,7 @@ DecEip proc uses esi pDe:DWORD
     
     mov esi, pDe
     assume esi:ptr DEBUG_EVENT
-    invoke OpenThread,THREAD_ALL_ACCESS,FALSE, g_de.dwThreadId
+    invoke OpenThread,THREAD_ALL_ACCESS,FALSE, [esi].dwThreadId
     mov @hThread, eax
     invoke GetContext,addr @ctx, @hThread
    	dec @ctx.regEip
@@ -104,10 +104,12 @@ DecEip proc uses esi pDe:DWORD
 
 DecEip endp
 
-SetTF proc
+SetTF proc uses esi, pDe:DWORD
     LOCAL @ctx:CONTEXT
     LOCAL @hThread:DWORD
-        
+    
+    mov esi, pDe
+    assume esi:ptr DEBUG_EVENT    
     invoke OpenThread,THREAD_ALL_ACCESS,FALSE, g_de.dwThreadId
     mov @hThread, eax
     invoke GetContext,addr @ctx, @hThread

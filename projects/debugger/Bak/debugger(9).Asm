@@ -8,14 +8,7 @@ include utils.inc
 include output_debug_handler.inc
 include bp_handler.inc
 include t_p_handler.inc
-
-externdef g_bIsSingleTStep:dword
-externdef g_bIsSinglePStep:dword
-externdef g_bIsBhSingleStep:dword
-externdef g_bIsBaESingleStep:dword
-externdef g_bIsBaWSingleStep:dword
-externdef g_bIsHardSingleStep:dword
-externdef g_bIsBmSingleStep:dword
+include ba_handler.inc
 
 .data
 	g_hProc  HANDLE 0
@@ -27,54 +20,18 @@ externdef g_bIsBmSingleStep:dword
 	
 	g_dwTraceEnd dd 0
 	
+	g_bIsSingleTStep dd FALSE
+	g_bIsSinglePStep dd FALSE
+	g_bIsBhSingleStep dd FALSE  ;硬件执行断点的单步标志
+	g_bIsBaESingleStep dd FALSE	; 硬件访问断点标志
+	g_bIsBaWSingleStep dd FALSE	; 硬件写入断点标志
+	g_bIsHardSingleStep dd FALSE; 硬件断点标志
+	g_bIsBmSingleStep dd FALSE  ;内存断点的单步标志 
+	
 	g_dwMmbpAddr dd 0 ;内存断点地址
     g_dwMmbpLen  dd 0 ;内存断点长度 
     g_dwMmbpOld  dd 0 ;原来的内存保护属性
 .code 
-
-
-SetBaCommand proc dwAddr:DWORD, bIsBaE:DWORD, dwBaLen:DWORD
-    LOCAL @ctx:CONTEXT
-    LOCAL @hThread:HANDLE
-
-    invoke OpenThread,THREAD_ALL_ACCESS,FALSE, g_de.dwThreadId
-    mov @hThread, eax
-    
-    invoke GetContext, addr @ctx, @hThread
-    
-    mov eax, dwAddr
-    mov @ctx.iDr0, eax
-    
-    
-	; 硬件断点
-    or @ctx.iDr7, 000f0001h
-    .if bIsBaE == TRUE
-    	.if dwBaLen == 1
-    		and @ctx.iDr7, 0fff3ffffh
-    	.elseif dwBaLen == 2
-    		and @ctx.iDr7, 0fff7ffffh
-    	.else 
-    		and @ctx.iDr7, 0ffffffffh
-    	.endif
-    .else
-    	.if dwBaLen == 1
-    		and @ctx.iDr7, 0fff1ffffh
-    	.elseif dwBaLen == 2
-    		and @ctx.iDr7, 0fff5ffffh
-    	.else 
-    		and @ctx.iDr7, 0fffdffffh
-    	.endif
-
-    .endif
-
-    
-    invoke SetContext, addr @ctx, @hThread
-    invoke CloseHandle, @hThread
-   
-    
-    ret
-
-SetBaCommand endp
 
 
 SetBhCommand proc dwAddr:DWORD
@@ -138,7 +95,7 @@ InputCommand proc uses ebx ecx
         ;判断trace是否结束
         .if eax != @currDwEip
             ;trace没有结束
-            invoke SetTCommand, offset g_de
+            invoke SetTCommand, offset g_de, offset g_bIsSingleTStep
             ret
         .else
             ;trace结束
@@ -206,7 +163,7 @@ InputCommand proc uses ebx ecx
                 .continue
             .endif
             mov @pAddr, eax
-            invoke SetBaCommand, @pAddr, @bIsBaE, @dwBaLen
+            invoke SetBaCommand, @pAddr, @bIsBaE, @dwBaLen, offset g_pe
             
          .elseif g_szCommand[0] == 'b' && g_szCommand[1] == 'h'
         	mov g_bIsBhSingleStep, TRUE
@@ -248,16 +205,16 @@ InputCommand proc uses ebx ecx
             
             ;启动单步
             mov g_dwTraceEnd, eax
-            invoke SetTCommand,offset g_de
+            invoke SetTCommand,offset g_de, offset g_bIsSingleTStep
             
             ret 
         .elseif g_szCommand[0] == 't'
-            invoke SetTCommand, offset g_de
+            invoke SetTCommand, offset g_de, offset g_bIsSingleTStep
             ret
         .elseif g_szCommand[0] == 'p'
         	invoke crt_strstr, addr @curBufAsm, offset g_szCall
         	 .if eax == NULL
-        	 	invoke SetTCommand, offset g_de
+        	 	invoke SetTCommand, offset g_de, offset g_bIsSingleTStep
             .else
             	mov g_bIsSinglePStep, TRUE
                 mov eax, @dwCodeLen
@@ -305,7 +262,7 @@ OnExcept proc
         	invoke crt_printf, offset g_szBpFmt, offset g_szSystemBp, [esi].ExceptionAddress
             mov g_bIsSysBp, FALSE
         .elseif g_bIsSinglePStep == TRUE
-        	invoke RestorePTF, g_hProc, g_dwPTFAddr, offset g_de
+        	invoke RestorePTF, g_hProc, g_dwPTFAddr, offset g_de, offset g_bIsSinglePStep
         	mov eax, g_dwPTFAddr
         	mov g_curExcptAddr, eax
         .else

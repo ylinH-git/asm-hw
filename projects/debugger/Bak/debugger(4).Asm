@@ -8,6 +8,8 @@ include utils.inc
 include output_debug_handler.inc
 include bp_handler.inc
 include t_p_handler.inc
+include ba_handler.inc
+include bh_handler.inc
 
 .data
 	g_hProc  HANDLE 0
@@ -31,76 +33,6 @@ include t_p_handler.inc
     g_dwMmbpLen  dd 0 ;内存断点长度 
     g_dwMmbpOld  dd 0 ;原来的内存保护属性
 .code 
-
-
-SetBaCommand proc dwAddr:DWORD, bIsBaE:DWORD, dwBaLen:DWORD
-    LOCAL @ctx:CONTEXT
-    LOCAL @hThread:HANDLE
-
-    invoke OpenThread,THREAD_ALL_ACCESS,FALSE, g_de.dwThreadId
-    mov @hThread, eax
-    
-    invoke GetContext, addr @ctx, @hThread
-    
-    mov eax, dwAddr
-    mov @ctx.iDr0, eax
-    
-    
-	; 硬件断点
-    or @ctx.iDr7, 000f0001h
-    .if bIsBaE == TRUE
-    	.if dwBaLen == 1
-    		and @ctx.iDr7, 0fff3ffffh
-    	.elseif dwBaLen == 2
-    		and @ctx.iDr7, 0fff7ffffh
-    	.else 
-    		and @ctx.iDr7, 0ffffffffh
-    	.endif
-    .else
-    	.if dwBaLen == 1
-    		and @ctx.iDr7, 0fff1ffffh
-    	.elseif dwBaLen == 2
-    		and @ctx.iDr7, 0fff5ffffh
-    	.else 
-    		and @ctx.iDr7, 0fffdffffh
-    	.endif
-
-    .endif
-
-    
-    invoke SetContext, addr @ctx, @hThread
-    invoke CloseHandle, @hThread
-   
-    
-    ret
-
-SetBaCommand endp
-
-
-SetBhCommand proc dwAddr:DWORD
-    LOCAL @ctx:CONTEXT
-    LOCAL @hThread:HANDLE
-
-    invoke OpenThread,THREAD_ALL_ACCESS,FALSE, g_de.dwThreadId
-    mov @hThread, eax
-    
-    invoke GetContext, addr @ctx, @hThread
-    
-    mov eax, dwAddr
-    mov @ctx.iDr0, eax
-    
-    
-	; 硬件访问断点
-    or @ctx.iDr7, 1;
-    and @ctx.iDr7, 0fff0ffffh
-    
-    invoke SetContext, addr @ctx, @hThread
-    invoke CloseHandle, @hThread
-   
-    
-    ret
-
-SetBhCommand endp
 
 SetBmCommand proc
     
@@ -206,7 +138,7 @@ InputCommand proc uses ebx ecx
                 .continue
             .endif
             mov @pAddr, eax
-            invoke SetBaCommand, @pAddr, @bIsBaE, @dwBaLen
+            invoke SetBaCommand, @pAddr, @bIsBaE, @dwBaLen, offset g_de
             
          .elseif g_szCommand[0] == 'b' && g_szCommand[1] == 'h'
         	mov g_bIsBhSingleStep, TRUE
@@ -220,7 +152,8 @@ InputCommand proc uses ebx ecx
             .endif
             
             ;设置断点
-            invoke SetBhCommand, eax
+            mov @pAddr, eax 
+            invoke SetBhCommand, @pAddr, offset g_pe
        	.elseif g_szCommand[0] == 'b' && g_szCommand[1] == 'm'
             invoke crt_strtoul, offset g_szCommand + 3, NULL, 16
             .if eax == 0 || eax == -1

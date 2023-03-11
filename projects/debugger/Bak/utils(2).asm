@@ -3,6 +3,7 @@
 option casemap :none  ;case sensitive
 
 include global.inc
+include disasm.inc
 
 .code 
 ; 获取上下文
@@ -104,7 +105,7 @@ DecEip proc uses esi pDe:DWORD
 
 DecEip endp
 
-SetTF proc uses esi, pDe:DWORD
+SetTF proc uses esi pDe:DWORD
     LOCAL @ctx:CONTEXT
     LOCAL @hThread:DWORD
     

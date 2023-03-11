@@ -41,7 +41,7 @@ GetCurrEip proc uses esi pDe:DWORD
     
     mov esi, pDe
     assume esi:ptr DEBUG_EVENT
-    invoke OpenThread,THREAD_ALL_ACCESS, FALSE, g_de.dwThreadId
+    invoke OpenThread,THREAD_ALL_ACCESS, FALSE, [esi].dwThreadId
     mov @hThread, eax
     invoke GetContext,addr @ctx, @hThread
 
@@ -51,7 +51,7 @@ GetCurrEip proc uses esi pDe:DWORD
 
 GetCurrEip endp
 
-PrintAsm proc uses ecx pCurBufAsm:DWORD, currDwEip:DWORD, pDwCodeLen:DWORD, asmNum: DWORD
+PrintAsm proc uses ecx hProc:HANDLE, pCurBufAsm:DWORD, currDwEip:DWORD, pDwCodeLen:DWORD, asmNum: DWORD
 	LOCAL @bufAsm[64]:BYTE
     LOCAL @bufCode[16]:BYTE
     LOCAL @dwEip:DWORD
@@ -64,7 +64,7 @@ PrintAsm proc uses ecx pCurBufAsm:DWORD, currDwEip:DWORD, pDwCodeLen:DWORD, asmN
     .while ecx < asmNum
     	push ecx
     	invoke RtlZeroMemory, addr @bufAsm, 64
-    	invoke ReadProcessMemory, g_hProc, @dwEip, addr @bufCode, 16, addr @dwBytesReadWrite
+    	invoke ReadProcessMemory, hProc, @dwEip, addr @bufCode, 16, addr @dwBytesReadWrite
     	invoke DisasmLine, addr @bufCode, 16, @dwEip, addr @bufAsm
     	pop ecx
     	mov @dwLastCodeLen, eax

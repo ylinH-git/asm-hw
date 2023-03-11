@@ -3,6 +3,7 @@
 option casemap :none  ;case sensitive
 
 include global.inc
+include disasm.inc
 
 .code 
 ; 获取上下文
@@ -69,6 +70,7 @@ PrintAsm proc uses ecx hProc:HANDLE, pCurBufAsm:DWORD, currDwEip:DWORD, pDwCodeL
     	pop ecx
     	mov @dwLastCodeLen, eax
     	.if ecx == 0
+    		mov 
     		mov [pDwCodeLen], eax
     		push ecx
     		invoke crt_strcpy, pCurBufAsm, addr @bufAsm
