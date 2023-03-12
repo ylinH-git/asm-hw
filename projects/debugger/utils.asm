@@ -4,6 +4,7 @@ option casemap :none  ;case sensitive
 
 include global.inc
 include disasm.inc
+include pe_handler.inc
 
 .code 
 ; 获取上下文
@@ -52,12 +53,51 @@ GetCurrEip proc uses esi pDe:DWORD
 
 GetCurrEip endp
 
+PrintFunc proc uses ecx hProc:DWORD,pAsmBuf:DWORD
+	invoke crt_strstr, pAsmBuf, offset g_szCall
+    .if eax != NULL
+    	mov ecx, pAsmBuf
+    	push ecx
+    	invoke crt_strstr, pAsmBuf, offset g_szPtr
+    	pop ecx
+    	.if eax != NULL
+			add ecx, 16
+		.elseif
+			add ecx, 5
+    	.endif 
+        invoke crt_strtoul, ecx, NULL, 16
+        invoke FindFuncName, hProc, eax
+    	ret
+	.endif
+	
+	invoke crt_strstr, pAsmBuf, offset g_szJmp
+	.if eax != NULL
+    	mov ecx, pAsmBuf
+    	push ecx
+    	invoke crt_strstr, pAsmBuf, offset g_szPtr
+    	pop ecx
+    	.if eax != NULL
+			add ecx, 15
+		.elseif
+			add ecx, 4
+    	.endif 
+        invoke crt_strtoul, ecx, NULL, 16
+        invoke FindFuncName, hProc, eax
+    	ret
+	.endif
+	
+	xor eax, eax
+	ret
+PrintFunc endp
+
 PrintAsm proc uses ecx ebx hProc:HANDLE, pCurBufAsm:DWORD, currDwEip:DWORD, pDwCodeLen:DWORD, asmNum: DWORD
 	LOCAL @bufAsm[64]:BYTE
     LOCAL @bufCode[16]:BYTE
     LOCAL @dwEip:DWORD
     LOCAL @dwBytesReadWrite:DWORD
     LOCAL @dwLastCodeLen:DWORD
+    LOCAL @needSearchFuncName:DWORD
+    LOCAL @funcFullNameAddr:DWORD
     
     mov eax, currDwEip
     mov @dwEip, eax
@@ -72,13 +112,28 @@ PrintAsm proc uses ecx ebx hProc:HANDLE, pCurBufAsm:DWORD, currDwEip:DWORD, pDwC
     	.if ecx == 0
     		mov ebx, pDwCodeLen
     		mov [ebx], eax
+
+    		invoke PrintFunc, hProc,addr @bufAsm
+    		mov @funcFullNameAddr, eax
     		push ecx
-    		invoke crt_strcpy, pCurBufAsm, addr @bufAsm
-    		invoke crt_printf, offset g_szCurAsmFmt, currDwEip, pCurBufAsm	
+    		.if eax != 0
+    			invoke crt_strcpy, pCurBufAsm, addr @bufAsm
+    			invoke crt_printf, offset g_szCurFuncAsmFmt, currDwEip, pCurBufAsm, @funcFullNameAddr	
+    		.elseif
+    			invoke crt_strcpy, pCurBufAsm, addr @bufAsm
+    			invoke crt_printf, offset g_szCurAsmFmt, currDwEip, pCurBufAsm	
+    		.endif
     		pop ecx
     	.else
+    		invoke PrintFunc, hProc,addr @bufAsm
+    		mov @funcFullNameAddr, eax
     		push ecx
-    		invoke crt_printf, offset g_szAsmFmt, @dwEip, addr @bufAsm	
+    		.if eax != 0
+    			invoke crt_printf, offset g_szFuncAsmFmt, @dwEip, addr @bufAsm, @funcFullNameAddr
+    			pop ecx
+    		.elseif
+    			invoke crt_printf, offset g_szAsmFmt, @dwEip, addr @bufAsm	
+    		.endif
     		pop ecx
     	.endif
     	mov eax, @dwLastCodeLen

@@ -40,20 +40,7 @@ bpStruct ends
     g_szAsmFmt                      db "0x%08X %s",0dh, 0ah, 0
     g_szCurAsmFmt                   db "0x%08X %s <==== ",0dh, 0ah, 0
     g_szCall    					db "call", 0
-    
+    g_szJmp   						db "jmp", 0
+    g_szFuncAsmFmt                  db "0x%08X %s <%s.%s.%s>",0dh, 0ah, 0
+    g_szCurFuncAsmFmt               db "0x%08X %s <%s.%s.%s> <==== ",0dh, 0ah, 0
   
-public g_bIsSingleTStep
-public g_bIsSinglePStep
-public g_bIsBhSingleStep
-public g_bIsBaESingleStep
-public g_bIsBaWSingleStep
-public g_bIsHardSingleStep
-public g_bIsBmSingleStep
-.data
-	g_bIsSingleTStep dd FALSE
-	g_bIsSinglePStep dd FALSE
-	g_bIsBhSingleStep dd FALSE  ;硬件执行断点的单步标志
-	g_bIsBaESingleStep dd FALSE	; 硬件访问断点标志
-	g_bIsBaWSingleStep dd FALSE	; 硬件写入断点标志
-	g_bIsHardSingleStep dd FALSE; 硬件断点标志
-	g_bIsBmSingleStep dd FALSE  ;内存断点的单步标志 

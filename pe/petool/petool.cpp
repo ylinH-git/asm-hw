@@ -117,9 +117,9 @@ ULONG CpetoolApp::GetRVAtoFA(ULONG rva)
 			break;
 		}
 
-		if (rva >= theApp.m_sectionHeaders[theApp.m_sectionHeaderLen - 1].VirtualAddress)
+		if (rva >= m_sectionHeaders[m_sectionHeaderLen - 1].VirtualAddress)
 		{
-			offset = rva - m_sectionHeaders[i].VirtualAddress + m_sectionHeaders[i].PointerToRawData;
+			offset = rva - m_sectionHeaders[m_sectionHeaderLen - 1].VirtualAddress + m_sectionHeaders[m_sectionHeaderLen - 1].PointerToRawData;
 			break;
 		}
 	}
@@ -140,10 +140,16 @@ ULONG CpetoolApp::GetFAtoRVA(ULONG fa)
 	ULONG offset = 0;
 	for (int i = 0; i < m_sectionHeaderLen - 1; i++)
 	{
-		if (fa > m_sectionHeaders[i].PointerToRawData
+		if (fa >= m_sectionHeaders[i].PointerToRawData
 			&& fa < m_sectionHeaders[i + 1].PointerToRawData)
 		{
 			offset = fa - m_sectionHeaders[i].PointerToRawData + m_sectionHeaders[i].VirtualAddress;
+			break;
+		}
+
+		if (fa >= m_sectionHeaders[m_sectionHeaderLen - 1].PointerToRawData)
+		{
+			offset = fa - m_sectionHeaders[m_sectionHeaderLen - 1].PointerToRawData + m_sectionHeaders[m_sectionHeaderLen - 1].VirtualAddress;
 			break;
 		}
 	}

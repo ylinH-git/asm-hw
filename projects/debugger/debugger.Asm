@@ -11,6 +11,7 @@ include t_p_handler.inc
 include ba_handler.inc
 include bh_handler.inc
 include bm_handler.inc
+include pe_handler.inc
 
 .data
 	g_hProc  HANDLE 0
@@ -33,6 +34,7 @@ include bm_handler.inc
 	g_dwMmbpAddr dd 0 ;内存断点地址
     g_dwMmbpLen  dd 0 ;内存断点长度 
     g_dwMmbpOld  dd 0 ;原来的内存保护属性
+
 .code 
 
 InputCommand proc uses ebx ecx
@@ -69,7 +71,7 @@ InputCommand proc uses ebx ecx
             mov g_dwTraceEnd, 0
         .endif
     .else
-    	invoke PrintAsm, g_hProc, addr @curBufAsm, @currDwEip, addr @dwCodeLen, 5
+    	invoke PrintAsm, g_hProc, addr @curBufAsm, @currDwEip, addr @dwCodeLen, 8
     .endif
     
     
@@ -198,7 +200,7 @@ InputCommand proc uses ebx ecx
             .if eax != 0 && eax != -1
              	mov @currDwEip, eax
             .endif
-            invoke PrintAsm, g_hProc,addr @curBufAsm, @currDwEip, addr @dwCodeLen,5
+            invoke PrintAsm, g_hProc,addr @curBufAsm, @currDwEip, addr @dwCodeLen, 8
   
         .elseif g_szCommand[0] == 'g'
             ret
@@ -340,6 +342,8 @@ main proc
     invoke RtlZeroMemory, addr @si, size @si
     invoke RtlZeroMemory, addr @pi, size @pi
     
+    invoke GetPeData
+    
     ;建立调试会话
     invoke CreateProcess, NULL, offset g_szExe, NULL, NULL, FALSE, \
             DEBUG_ONLY_THIS_PROCESS or CREATE_NEW_CONSOLE, NULL, NULL, addr @si, addr @pi
@@ -366,6 +370,8 @@ main proc
     .endw
     
     
+    invoke ClearPeData
+    xor eax ,eax
     ret
 
 main endp
