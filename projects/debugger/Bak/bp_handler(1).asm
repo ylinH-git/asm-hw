@@ -6,6 +6,8 @@ include global.inc
 include utils.inc
 
 .data
+	g_szBpListHeader               	db "序号      断点地址",0dh, 0ah, 0
+   	g_szNoneBpList           		db "没有断点记录",0dh, 0ah, 0
 	g_bpList bpStruct 100 dup(<?>) ;断点数组
 	g_bpsLen dd 0 ;断点数组长度
 .code 
@@ -95,7 +97,6 @@ FindBp proc uses ecx ebx dwAddr:DWORD
 	.endw
 	mov eax, 0
 	ret
-
 FindBp endp
 
 SetBp proc uses ecx ebx edx hProc:HANDLE, dwAddr:DWORD, dwFlag:DWORD

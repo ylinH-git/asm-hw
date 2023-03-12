@@ -6,6 +6,9 @@ include global.inc
 include utils.inc
 
 .data
+	g_szBpListHeader               	db "序号      断点地址",0dh, 0ah, 0
+   	g_szNoneBpList           		db "没有断点记录",0dh, 0ah, 0
+   	g_szBpListFmt                  	db "%+4u      %+08X",0dh, 0ah, 0
 	g_bpList bpStruct 100 dup(<?>) ;断点数组
 	g_bpsLen dd 0 ;断点数组长度
 .code 

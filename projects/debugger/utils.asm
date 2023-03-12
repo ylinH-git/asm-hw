@@ -90,6 +90,17 @@ PrintFunc proc uses ecx hProc:DWORD,pAsmBuf:DWORD
 	ret
 PrintFunc endp
 
+GetAsm proc uses ebx hProc:HANDLE, pCurBufAsm:DWORD, currDwEip:DWORD, pDwCodeLen:DWORD
+    LOCAL @bufCode[16]:BYTE
+    LOCAL @dwBytesReadWrite:DWORD
+   
+    invoke ReadProcessMemory, hProc, currDwEip, addr @bufCode, 16, addr @dwBytesReadWrite
+    invoke DisasmLine, addr @bufCode, 16, currDwEip, pCurBufAsm
+    mov ebx, pDwCodeLen
+    mov [ebx], eax
+    ret
+GetAsm endp
+
 PrintAsm proc uses ecx ebx hProc:HANDLE, pCurBufAsm:DWORD, currDwEip:DWORD, pDwCodeLen:DWORD, asmNum: DWORD
 	LOCAL @bufAsm[64]:BYTE
     LOCAL @bufCode[16]:BYTE
@@ -115,26 +126,31 @@ PrintAsm proc uses ecx ebx hProc:HANDLE, pCurBufAsm:DWORD, currDwEip:DWORD, pDwC
 
     		invoke PrintFunc, hProc,addr @bufAsm
     		mov @funcFullNameAddr, eax
-    		push ecx
+    		
     		.if eax != 0
+    			push ecx
     			invoke crt_strcpy, pCurBufAsm, addr @bufAsm
     			invoke crt_printf, offset g_szCurFuncAsmFmt, currDwEip, pCurBufAsm, @funcFullNameAddr	
+    			pop ecx
     		.elseif
+    			push ecx
     			invoke crt_strcpy, pCurBufAsm, addr @bufAsm
     			invoke crt_printf, offset g_szCurAsmFmt, currDwEip, pCurBufAsm	
+    			pop ecx
     		.endif
-    		pop ecx
+
     	.else
     		invoke PrintFunc, hProc,addr @bufAsm
     		mov @funcFullNameAddr, eax
-    		push ecx
     		.if eax != 0
+    			push ecx
     			invoke crt_printf, offset g_szFuncAsmFmt, @dwEip, addr @bufAsm, @funcFullNameAddr
     			pop ecx
     		.elseif
+    		    push ecx
     			invoke crt_printf, offset g_szAsmFmt, @dwEip, addr @bufAsm	
+    			pop ecx
     		.endif
-    		pop ecx
     	.endif
     	mov eax, @dwLastCodeLen
     	add @dwEip, eax

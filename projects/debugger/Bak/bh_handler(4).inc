@@ -1,0 +1,1 @@
+SetBhCommand proto dwAddr:DWORD, pDe:DWORD, dwLen:DWORD, dwType:DWORD

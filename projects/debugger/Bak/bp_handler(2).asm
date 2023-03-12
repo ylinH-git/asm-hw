@@ -95,7 +95,6 @@ FindBp proc uses ecx ebx dwAddr:DWORD
 	.endw
 	mov eax, 0
 	ret
-
 FindBp endp
 
 SetBp proc uses ecx ebx edx hProc:HANDLE, dwAddr:DWORD, dwFlag:DWORD
@@ -132,7 +131,7 @@ SetBp proc uses ecx ebx edx hProc:HANDLE, dwAddr:DWORD, dwFlag:DWORD
 
 SetBp endp
 
-RestoreBp proc uses ebx ecx dwAddr:DWORD, pDe:DWORD
+RestoreBp proc uses ebx ecx hProc:HANDLE, dwAddr:DWORD, pDe:DWORD
     invoke FindBp, dwAddr
     .if eax == 0
     	ret

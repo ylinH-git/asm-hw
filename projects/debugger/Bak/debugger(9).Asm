@@ -11,6 +11,9 @@ include t_p_handler.inc
 include ba_handler.inc
 include bh_handler.inc
 include bm_handler.inc
+include pe_handler.inc
+include dd_handler.inc
+include r_handler.inc
 
 .data
 	g_hProc  HANDLE 0
@@ -24,15 +27,20 @@ include bm_handler.inc
 	
 	g_bIsSingleTStep dd FALSE
 	g_bIsSinglePStep dd FALSE
-	g_bIsBhSingleStep dd FALSE  ;硬件执行断点的单步标志
-	g_bIsBaESingleStep dd FALSE	; 硬件访问断点标志
-	g_bIsBaWSingleStep dd FALSE	; 硬件写入断点标志
 	g_bIsHardSingleStep dd FALSE; 硬件断点标志
 	g_bIsBmSingleStep dd FALSE  ;内存断点的单步标志 
 	
 	g_dwMmbpAddr dd 0 ;内存断点地址
     g_dwMmbpLen  dd 0 ;内存断点长度 
     g_dwMmbpOld  dd 0 ;原来的内存保护属性
+    
+   	g_dwBhLen dd 0 ; 硬件断点长度
+   	g_dwBhType dd 0 ; 硬件断点类型
+   	g_currHardBreakIdx dd 0; 当前触发的断点序号
+    
+    g_dwRunEnd   dd 0 ;运行结束地址
+
+
 .code 
 
 InputCommand proc uses ebx ecx
@@ -49,9 +57,35 @@ InputCommand proc uses ebx ecx
     LOCAL @dwBaLen:DWORD
     
     invoke RtlZeroMemory, addr @curBufAsm, 64
-    ;输入命令之前，显示五条反汇编
     invoke GetCurrEip,offset g_de
     mov @currDwEip, eax
+    
+    ;判断运行功能是否有终点
+    mov eax, g_dwRunEnd
+    .if eax != 0
+        ;判断run是否结束
+        .if eax != @currDwEip
+        	push eax
+    		invoke GetAsm, g_hProc, addr @curBufAsm, @currDwEip, addr @dwCodeLen
+    		pop eax
+            ;run没有结束
+            invoke crt_strstr, addr @curBufAsm, offset g_szCall
+        	 .if eax == NULL
+        	 	invoke SetTCommand, offset g_de, offset g_bIsSingleTStep
+            .else
+            	mov g_bIsSinglePStep, TRUE
+                mov eax, @dwCodeLen
+            	add @currDwEip, eax
+            	mov eax, @currDwEip
+            	mov g_dwPTFAddr, eax
+            	invoke SetPTF, g_hProc, @currDwEip
+            .endif
+            ret
+        .else
+            ;run结束
+            mov g_dwRunEnd, 0
+        .endif
+    .endif
     
     ;判断是否开启了trace
     mov eax, g_dwTraceEnd
@@ -80,7 +114,12 @@ InputCommand proc uses ebx ecx
         invoke crt_gets, offset g_szCommand
         
         ;解析命令码
-        .if g_szCommand[0] == 'b' && g_szCommand[1] == 'p'
+        .if g_szCommand[0] == 'b' && g_szCommand[1] == 'p' && g_szCommand[2] == 'l'
+        	invoke ShowBpList
+        .elseif g_szCommand[0] == 'b' && g_szCommand[1] == 'p' && g_szCommand[2] == 'c'
+        	invoke crt_strtoul, offset g_szCommand + 4, NULL, 16
+        	invoke ClearBpList, g_hProc, eax
+        .elseif g_szCommand[0] == 'b' && g_szCommand[1] == 'p'
             ;解析参数 - 地址（字符串转数字）
             invoke crt_strtoul, offset g_szCommand + 3, NULL, 16
             .if eax == 0 || eax == -1
@@ -90,52 +129,16 @@ InputCommand proc uses ebx ecx
             .endif
             
             invoke SetBp, g_hProc,eax, 0
-        .elseif g_szCommand[0] == 'b' && g_szCommand[1] == 'l'
-        	invoke ShowBpList
-        .elseif g_szCommand[0] == 'b' && g_szCommand[1] == 'c'
-        	invoke crt_strtoul, offset g_szCommand + 3, NULL, 16
-        	invoke ClearBpList, g_hProc,eax
-        .elseif g_szCommand[0] == 'b' && g_szCommand[1] == 'a'
-			mov g_bIsBhSingleStep, FALSE
-            mov al, g_szCommand[3]
-            .if al == 'e'
-            	mov g_bIsBaESingleStep, TRUE
-            	mov @bIsBaE, TRUE
-            .elseif al == 'w'
-            	mov g_bIsBaWSingleStep, TRUE
-            	mov @bIsBaE, FALSE
-            .else
-            	invoke crt_printf, offset g_szCommandErrTip
-                .continue
-            .endif
-            invoke crt_strtoul, offset g_szCommand + 5, NULL, 16
-            .if eax == 0 || eax == -1
-                ;命令出错，重新输入
+        .elseif g_szCommand[0] == 'b' && g_szCommand[1] == 'h' && g_szCommand[2] == 'l'
+        	invoke ShowBhList, offset g_de
+        .elseif g_szCommand[0] == 'b' && g_szCommand[1] == 'h' && g_szCommand[2] == 'c'
+        	invoke crt_strtoul, offset g_szCommand + 4, NULL, 16
+        	.if eax < 1 && eax > 4
                 invoke crt_printf, offset g_szCommandErrTip
                 .continue
             .endif
-            mov @dwBaLen, eax
-            
-            .if @dwBaLen != 1 && @dwBaLen != 2 && @dwBaLen != 4
-    			;命令出错，重新输入
-				invoke crt_printf, offset g_szCommandErrTip
-				.continue
-			.endif
-            
-            invoke crt_strtoul, offset g_szCommand + 7, NULL, 16
-
-            .if eax == 0 || eax == -1
-                ;命令出错，重新输入
-                invoke crt_printf, offset g_szCommandErrTip
-                .continue
-            .endif
-            mov @pAddr, eax
-            invoke SetBaCommand, @pAddr, @bIsBaE, @dwBaLen, offset g_de
-            
+        	invoke ClearBhCommand, offset g_de, eax   
          .elseif g_szCommand[0] == 'b' && g_szCommand[1] == 'h'
-        	mov g_bIsBhSingleStep, TRUE
-        	mov g_bIsBaESingleStep, FALSE
-        	mov g_bIsBaWSingleStep, FALSE
         	invoke crt_strtoul, offset g_szCommand+3, NULL, 16
             .if eax == 0 || eax == -1
                 ;命令出错，重新输入
@@ -145,7 +148,30 @@ InputCommand proc uses ebx ecx
             
             ;设置断点
             mov @pAddr, eax 
-            invoke SetBhCommand, @pAddr, offset g_de
+            
+            ;解析参数 - 长度
+            invoke crt_strtoul, offset g_szCommand + 12, NULL, 16
+            .if eax == 0 || eax == -1 || (eax != 1 && eax != 2 && eax != 4)
+                invoke crt_printf, offset g_szCommandErrTip
+                .continue
+            .endif
+            mov g_dwBhLen, eax
+            
+            ;解析参数 - 类型
+            mov eax, offset g_szCommand 
+            add eax, 14
+            .if byte ptr [eax] == 'e'
+            	mov g_dwBhType, 0
+            .elseif byte ptr [eax] == 'w'
+            	mov g_dwBhType, 1
+            .elseif byte ptr [eax] == 'a'
+            	mov g_dwBhType, 2
+            .elseif
+            	invoke crt_printf, offset g_szCommandErrTip
+                .continue
+            .endif
+            
+            invoke SetBhCommand, @pAddr, offset g_de, g_dwBhLen, g_dwBhType
        	.elseif g_szCommand[0] == 'b' && g_szCommand[1] == 'm'
             invoke crt_strtoul, offset g_szCommand + 3, NULL, 16
             .if eax == 0 || eax == -1
@@ -164,6 +190,12 @@ InputCommand proc uses ebx ecx
             
             invoke SetBmCommand, g_hProc, g_dwMmbpAddr, g_dwMmbpLen, offset g_dwMmbpOld
             
+        .elseif g_szCommand[0] == 'd' && g_szCommand[1] == 'd'
+        	invoke crt_strtoul, offset g_szCommand + 3, NULL, 16
+            .if eax != 0 && eax != -1
+             	mov @currDwEip, eax
+            .endif
+            invoke HandlerDDCommand, g_hProc, @currDwEip
        	.elseif g_szCommand[0] == 't' && g_szCommand[1] == 'r'&& g_szCommand[2] == 'a'&& g_szCommand[3] == 'c'&& g_szCommand[4] == 'e'
             invoke crt_strtoul, offset g_szCommand + 6, NULL, 16
             .if eax == 0 || eax == -1
@@ -194,13 +226,19 @@ InputCommand proc uses ebx ecx
 
             ret
         .elseif g_szCommand[0] == 'u'
-        	invoke crt_strtoul, offset g_szCommand + 3, NULL, 16
+        	invoke crt_strtoul, offset g_szCommand + 2, NULL, 16
             .if eax != 0 && eax != -1
              	mov @currDwEip, eax
             .endif
             invoke PrintAsm, g_hProc,addr @curBufAsm, @currDwEip, addr @dwCodeLen, 8
-  
+         .elseif g_szCommand[0] == 'r'
+            invoke HandlerRCommand, offset g_de
         .elseif g_szCommand[0] == 'g'
+        	invoke crt_strtoul, offset g_szCommand + 2, NULL, 16
+            .if eax != 0 && eax != -1
+            	mov g_dwRunEnd, eax
+             	invoke SetTCommand,offset g_de, offset g_bIsSingleTStep
+            .endif
             ret
         .endif
     .endw
@@ -252,6 +290,9 @@ OnExcept proc
             invoke OpenThread,THREAD_ALL_ACCESS,FALSE, g_de.dwThreadId
     		mov @hThread, eax
      		invoke GetContext, addr @ctx, @hThread
+     		.if g_currHardBreakIdx == 0
+     		.else if 
+     		.endif
             or @ctx.iDr7, 1
     		invoke SetContext, addr @ctx, @hThread
     		invoke CloseHandle, @hThread
@@ -275,9 +316,14 @@ OnExcept proc
     	mov @hThread, eax
     		
         invoke GetContext, addr @ctx, @hThread
-        .if g_bIsBhSingleStep == TRUE
-        	.if @ctx.iDr6 & 1
-            	invoke crt_printf, offset g_szBhTip, @ctx.regEip
+        
+        .if @ctx.iDr6 & 1
+        	.if @ctx.iDr7 & 00010000h
+        		invoke crt_printf, offset g_szBhWTip, @ctx.iDr0
+        	.elseif @ctx.iDr7 & 00030000h
+        		invoke crt_printf, offset g_szBhATip, @ctx.iDr0
+        	.elseif
+        		invoke crt_printf, offset g_szBhETip, @ctx.regEip
             
             	and @ctx.iDr7, 0fffffffeh
             	or @ctx.regFlag, 100h
@@ -285,23 +331,63 @@ OnExcept proc
             	invoke SetContext, addr @ctx, @hThread
             
             	mov g_bIsHardSingleStep, TRUE
-	       
-            	mov @bIsInputCmd, TRUE
-         	.endif
-        .endif
-
-         
-        .if g_bIsBaESingleStep == TRUE || g_bIsBaWSingleStep == TRUE
-        	.if @ctx.iDr6 & 1
-        		.if g_bIsBaESingleStep == TRUE
-            		invoke crt_printf, offset g_szBaETip, @ctx.iDr0
-            	.else
-            		invoke crt_printf, offset g_szBaWTip, @ctx.iDr0
-            	.endif 
-            	mov @bIsInputCmd, TRUE
+            	mov g_currHardBreakIdx, 1
         	.endif
+        	mov @bIsInputCmd, TRUE
+       	.elseif @ctx.iDr6 & 2
+       	   	.if @ctx.iDr7 & 00100000h
+        		invoke crt_printf, offset g_szBhWTip, @ctx.iDr0
+        	.elseif @ctx.iDr7 & 00300000h
+        		invoke crt_printf, offset g_szBhATip, @ctx.iDr0
+        	.elseif
+        		invoke crt_printf, offset g_szBhETip, @ctx.regEip
+            
+            	and @ctx.iDr7, 0ffffffefh
+            	or @ctx.regFlag, 100h
+            	
+            	invoke SetContext, addr @ctx, @hThread
+            
+            	mov g_bIsHardSingleStep, TRUE
+            	mov g_currHardBreakIdx, 2
+        	.endif
+        	mov @bIsInputCmd, TRUE
+       	.elseif @ctx.iDr6 & 4
+       	   	.if @ctx.iDr7 & 00010000h
+        		invoke crt_printf, offset g_szBhWTip, @ctx.iDr0
+        	.elseif @ctx.iDr7 & 03000000h
+        		invoke crt_printf, offset g_szBhATip, @ctx.iDr0
+        	.elseif
+        		invoke crt_printf, offset g_szBhETip, @ctx.regEip
+            
+            	and @ctx.iDr7, 0fffffeffh
+            	or @ctx.regFlag, 100h
+            	
+            	invoke SetContext, addr @ctx, @hThread
+            
+            	mov g_bIsHardSingleStep, TRUE
+            	mov g_currHardBreakIdx, 3
+        	.endif
+        	mov @bIsInputCmd, TRUE
+       	.elseif @ctx.iDr6 & 8
+       	   	.if @ctx.iDr7 & 10000000h
+        		invoke crt_printf, offset g_szBhWTip, @ctx.iDr0
+        	.elseif @ctx.iDr7 & 30000000h
+        		invoke crt_printf, offset g_szBhATip, @ctx.iDr0
+        	.elseif
+        		invoke crt_printf, offset g_szBhETip, @ctx.regEip
+            
+            	and @ctx.iDr7, 0ffffefffh
+            	or @ctx.regFlag, 100h
+            	
+            	invoke SetContext, addr @ctx, @hThread
+            
+            	mov g_bIsHardSingleStep, TRUE
+            	mov g_currHardBreakIdx, 4
+        	.endif
+        	mov @bIsInputCmd, TRUE
         .endif
-        invoke CloseHandle, @hThread 
+ 		invoke CloseHandle, @hThread 
+       
         .if @bIsInputCmd == TRUE
             invoke InputCommand
         .endif
@@ -340,6 +426,8 @@ main proc
     invoke RtlZeroMemory, addr @si, size @si
     invoke RtlZeroMemory, addr @pi, size @pi
     
+    invoke GetPeData
+    
     ;建立调试会话
     invoke CreateProcess, NULL, offset g_szExe, NULL, NULL, FALSE, \
             DEBUG_ONLY_THIS_PROCESS or CREATE_NEW_CONSOLE, NULL, NULL, addr @si, addr @pi
@@ -366,6 +454,8 @@ main proc
     .endw
     
     
+    invoke ClearPeData
+    xor eax ,eax
     ret
 
 main endp

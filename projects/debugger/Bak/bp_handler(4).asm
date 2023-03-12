@@ -98,7 +98,7 @@ FindBp proc uses ecx ebx dwAddr:DWORD
 
 FindBp endp
 
-SetBp proc uses ecx ebx edx dwAddr:DWORD, dwFlag:DWORD
+SetBp proc uses ecx ebx edx hProc:HANDLE, dwAddr:DWORD, dwFlag:DWORD
     LOCAL @dwBytesWriteReaded:DWORD
     LOCAL @btCC:BYTE
     
@@ -132,22 +132,20 @@ SetBp proc uses ecx ebx edx dwAddr:DWORD, dwFlag:DWORD
 
 SetBp endp
 
-RestoreBp proc uses esi ebx ecx dwAddr:DWORD, pDe:DWORD
+RestoreBp proc uses ebx ecx dwAddr:DWORD, pDe:DWORD
     invoke FindBp, dwAddr
     .if eax == 0
     	ret
     .endif
     
-    mov esi, pDe
-    assume esi:ptr DEBUG_EVENT
     mov ebx, eax
     assume ebx:ptr bpStruct
     
     lea ecx, [ebx].m_oldCode
     ;ªπ‘≠÷∏¡Ó
     invoke WriteMemory, hProc, dwAddr, ecx, 1
-    invoke SetTF, offset g_de
-    invoke DecEip, offset g_de
+    invoke SetTF, pDe 
+    invoke DecEip, pDe
     ret
 
 RestoreBp endp

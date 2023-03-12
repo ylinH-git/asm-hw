@@ -20,9 +20,6 @@ bpStruct struc
 	m_dwAddr  dd 0
 bpStruct ends
 
-externdef g_bIsSingleTStep:dword
-externdef g_bIsSinglePStep:dword
-
 
 .const
 	g_szExe 						db "test.exe", 0
@@ -43,4 +40,7 @@ externdef g_bIsSinglePStep:dword
     g_szAsmFmt                      db "0x%08X %s",0dh, 0ah, 0
     g_szCurAsmFmt                   db "0x%08X %s <==== ",0dh, 0ah, 0
     g_szCall    					db "call", 0
-    
+    g_szJmp   						db "jmp", 0
+    g_szFuncAsmFmt                  db "0x%08X %s <%s.%s.%s>",0dh, 0ah, 0
+    g_szCurFuncAsmFmt               db "0x%08X %s <%s.%s.%s> <==== ",0dh, 0ah, 0
+  

@@ -57,24 +57,48 @@ PrintFunc proc uses ecx hProc:DWORD,pAsmBuf:DWORD
 	invoke crt_strstr, pAsmBuf, offset g_szCall
     .if eax != NULL
     	mov ecx, pAsmBuf
-    	add ecx, 5
+    	push ecx
+    	invoke crt_strstr, pAsmBuf, offset g_szPtr
+    	pop ecx
+    	.if eax != NULL
+			add ecx, 16
+		.elseif
+			add ecx, 5
+    	.endif 
         invoke crt_strtoul, ecx, NULL, 16
-        invoke FindFuncName, eax
+        invoke FindFuncName, hProc, eax
     	ret
 	.endif
 	
 	invoke crt_strstr, pAsmBuf, offset g_szJmp
 	.if eax != NULL
     	mov ecx, pAsmBuf
-    	add ecx, 4
+    	push ecx
+    	invoke crt_strstr, pAsmBuf, offset g_szPtr
+    	pop ecx
+    	.if eax != NULL
+			add ecx, 15
+		.elseif
+			add ecx, 4
+    	.endif 
         invoke crt_strtoul, ecx, NULL, 16
-        invoke FindFuncName, eax
+        invoke FindFuncName, hProc, eax
     	ret
 	.endif
 	
 	xor eax, eax
 	ret
 PrintFunc endp
+
+GetAsm proc hProc:HANDLE, pCurBufAsm:DWORD, currDwEip:DWORD
+    LOCAL @bufCode[16]:BYTE
+    LOCAL @dwBytesReadWrite:DWORD
+    LOCAL @funcFullNameAddr:DWORD
+   
+    invoke ReadProcessMemory, hProc, currDwEip, addr @bufCode, 16, addr @dwBytesReadWrite
+    invoke DisasmLine, addr @bufCode, 16, currDwEip, addr @bufAsm
+	ret
+GetAsm endp
 
 PrintAsm proc uses ecx ebx hProc:HANDLE, pCurBufAsm:DWORD, currDwEip:DWORD, pDwCodeLen:DWORD, asmNum: DWORD
 	LOCAL @bufAsm[64]:BYTE
@@ -83,6 +107,7 @@ PrintAsm proc uses ecx ebx hProc:HANDLE, pCurBufAsm:DWORD, currDwEip:DWORD, pDwC
     LOCAL @dwBytesReadWrite:DWORD
     LOCAL @dwLastCodeLen:DWORD
     LOCAL @needSearchFuncName:DWORD
+    LOCAL @funcFullNameAddr:DWORD
     
     mov eax, currDwEip
     mov @dwEip, eax
@@ -98,26 +123,33 @@ PrintAsm proc uses ecx ebx hProc:HANDLE, pCurBufAsm:DWORD, currDwEip:DWORD, pDwC
     		mov ebx, pDwCodeLen
     		mov [ebx], eax
 
-    		invoke PrintFunc, addr @bufAsm
-    		push ecx
+    		invoke PrintFunc, hProc,addr @bufAsm
+    		mov @funcFullNameAddr, eax
+    		
     		.if eax != 0
+    			push ecx
     			invoke crt_strcpy, pCurBufAsm, addr @bufAsm
-    			invoke crt_printf, offset g_szCurFuncAsmFmt, currDwEip, pCurBufAsm, pCurBufAsm	
-    		.elseif
-    			invoke crt_strcpy, pCurBufAsm, addr @bufAsm
-    			invoke crt_printf, offset g_szCurAsmFmt, currDwEip, pCurBufAsm	
-    		.endif
-    		pop ecx
-    	.else
-    		invoke PrintFunc, addr @bufAsm
-    		push ecx
-    		.if eax != 0
-    			invoke crt_printf, offset g_szFuncAsmFmt, @dwEip, addr @bufAsm, addr @bufAsm
+    			invoke crt_printf, offset g_szCurFuncAsmFmt, currDwEip, pCurBufAsm, @funcFullNameAddr	
     			pop ecx
     		.elseif
-    			invoke crt_printf, offset g_szAsmFmt, @dwEip, addr @bufAsm	
+    			push ecx
+    			invoke crt_strcpy, pCurBufAsm, addr @bufAsm
+    			invoke crt_printf, offset g_szCurAsmFmt, currDwEip, pCurBufAsm	
+    			pop ecx
     		.endif
-    		pop ecx
+
+    	.else
+    		invoke PrintFunc, hProc,addr @bufAsm
+    		mov @funcFullNameAddr, eax
+    		.if eax != 0
+    			push ecx
+    			invoke crt_printf, offset g_szFuncAsmFmt, @dwEip, addr @bufAsm, @funcFullNameAddr
+    			pop ecx
+    		.elseif
+    		    push ecx
+    			invoke crt_printf, offset g_szAsmFmt, @dwEip, addr @bufAsm	
+    			pop ecx
+    		.endif
     	.endif
     	mov eax, @dwLastCodeLen
     	add @dwEip, eax

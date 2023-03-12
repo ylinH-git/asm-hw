@@ -7,6 +7,7 @@ include utils.inc
 
 .data
 	g_bpList bpStruct 100 dup(<?>) ;断点数组
+	g_bpsLen dd 0 ;断点数组长度
 .code 
 
 ClearBpList proc uses ecx ebx edx hProc:HANDLE, dwAddr:DWORD
@@ -36,7 +37,7 @@ ClearBpList proc uses ecx ebx edx hProc:HANDLE, dwAddr:DWORD
 				push ecx
 				lea ecx, [ebx].m_oldCode
     			;还原指令
-    			invoke WriteMemory, g_hProc, [ebx].m_dwAddr, ecx, 1
+    			invoke WriteMemory, hProc, [ebx].m_dwAddr, ecx, 1
 				pop ecx
 				invoke RtlZeroMemory, ebx, 5
 				dec g_bpsLen
@@ -117,7 +118,7 @@ SetBp proc uses ecx ebx edx dwAddr:DWORD, dwFlag:DWORD
 	
 		lea edx, [ecx].m_oldCode
 		push ecx
-    	invoke ReadProcessMemory, g_hProc, dwAddr, edx, 1, addr @dwBytesWriteReaded
+    	invoke ReadProcessMemory, hProc, dwAddr, edx, 1, addr @dwBytesWriteReaded
     	pop ecx
     	mov edx, dwAddr
     	mov [ecx].m_dwAddr, edx
@@ -125,7 +126,7 @@ SetBp proc uses ecx ebx edx dwAddr:DWORD, dwFlag:DWORD
     .endif
     	;写入CC
     	mov @btCC, 0cch
-    	invoke WriteMemory, g_hProc, dwAddr, addr @btCC, size @btCC
+    	invoke WriteMemory, hProc, dwAddr, addr @btCC, size @btCC
     
     ret
 
