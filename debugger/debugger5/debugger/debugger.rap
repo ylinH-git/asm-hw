@@ -92,7 +92,7 @@ MilestoneOnDate=0
 MilestoneOnDateWhen=1
 MilestoneOnDateStatus=0
 <<<<<<< Updated upstream
-MilestoneOnDateDate=8
+MilestoneOnDateDate=13
 =======
 MilestoneOnDateDate=27
 >>>>>>> Stashed changes
@@ -139,7 +139,7 @@ ProductVer4Range=0
 5=
 1004=
 [Size]
-1=0,0,0,0,2762
+1=0,0,0,0,1297
 2=0,0,0,0,0
 7=0,0,0,0,49
 1002=0,0,0,0,382
@@ -185,13 +185,13 @@ ProductVer4Range=0
 [BreakPoint]
 0=
 [Find]
-1="@dwCodeLen"
-2="g_bIsSinglePStep"
-3="g_bIsSingleTStep"
-4="g_dwPTFAddr"
-5="pBIsPStep"
-6="dwPTFAddr"
-7="g_pTFBpOldCode"
-8="g_dwTFBpAddr"
-9="SetTCommand"
-10="g_szNoneBpList"
+1="SetBmCommand"
+2="@dwCodeLen"
+3="g_bIsSinglePStep"
+4="g_bIsSingleTStep"
+5="g_dwPTFAddr"
+6="pBIsPStep"
+7="dwPTFAddr"
+8="g_pTFBpOldCode"
+9="g_dwTFBpAddr"
+10="SetTCommand"

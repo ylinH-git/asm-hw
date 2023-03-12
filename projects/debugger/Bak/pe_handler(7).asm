@@ -603,7 +603,7 @@ FindFuncName proc uses ecx esi edi ebx edx hProc:DWORD, dwFuncAddr:DWORD
 	mov eax, size DWORD
 	mov ecx, @currImportIdx
 	mul ecx
-	add eax, offset g_funcsLens
+	add eax, g_funcsLens
 	mov eax, dword ptr [eax]
 	mov @currImportFuncsLen, eax
 	

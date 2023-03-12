@@ -623,6 +623,7 @@ FindFuncName proc uses ecx esi edi ebx edx hProc:DWORD, dwFuncAddr:DWORD
 				mov ebx, eax
 				add ebx, g_importDllNameFAs
 				mov ebx, dword ptr [ebx]
+				push edx
 				invoke GetFAtoRVA, ebx
 				add eax, @hModule
 				mov @tempAddr, eax

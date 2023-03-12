@@ -1,1 +1,7 @@
-SetBmCommand proto hProc:HANDLE, mmBpAddr:DWORD, mmBpLen:DWORD, pMmbpOld:DWORD
+SetBmCommand proto hProc:HANDLE, mmBmAddr:DWORD, mmBmLen:DWORD, mmBmType:DWORD
+FindBm proto dwAddr:DWORD
+FindBmInPage proto dwAddr:DWORD
+ShowBmPList proto
+ShowBmList proto
+ClearBmList proto hProc:HANDLE, dwIdx:DWORD
+ResetBmCommand proto hProc:HANDLE, dwAddr:DWORD

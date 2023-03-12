@@ -23,6 +23,17 @@ bpStruct struc
 bpStruct ends
 
 
+bmStruct struc
+	m_dwPage 	dd 0
+	m_dwOldAttr dd 0
+	m_dwNewAttr dd 0
+	m_dwLen     dd 0
+	m_dwType	dd 0
+	m_dwAddr    dd 0
+bmStruct ends
+
+
+
 .const
 	g_szExe 						db "test.exe", 0
 	g_szSystemBegin 				db "start debugging...", 0dh, 0ah, 0
@@ -30,10 +41,11 @@ bpStruct ends
     g_szCommandErrTip              	db "命令出错", 0dh, 0ah, 0
    	g_szSystemBp					db "命中系统断点:0x", 0
    	g_szCustomBp					db "命中一般断点:0x", 0
-   	g_szBhTip                       db "命中硬件执行断点 %08X", 0dh, 0ah, 0
-   	g_szBaETip                      db "命中硬件访问断点 %08X", 0dh, 0ah, 0
-   	g_szBaWTip                      db "命中硬件写入断点 %08X", 0dh, 0ah, 0
-   	g_szBmTip                      	db "命中内存写入断点 %08X", 0dh, 0ah, 0
+   	g_szBhETip                      db "命中硬件执行断点 %08X", 0dh, 0ah, 0
+   	g_szBhATip                      db "命中硬件访问断点 %08X", 0dh, 0ah, 0
+   	g_szBhWTip                      db "命中硬件写入断点 %08X", 0dh, 0ah, 0
+   	g_szBmWTip                      db "命中内存写入断点 %08X", 0dh, 0ah, 0
+   	g_szBmRTip                      db "命中内存写入断点 %08X", 0dh, 0ah, 0
     g_szFmt                        	db "%s",0dh, 0ah, 0
     g_szBpFmt                       db "%s%+08X",0dh, 0ah, 0
     g_szAsmFmt                      db "0x%08X %s",0dh, 0ah, 0

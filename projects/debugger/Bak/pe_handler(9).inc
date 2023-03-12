@@ -9,4 +9,5 @@ GetDataDirStructLen proto
 GetSectionHeadersLen proto
 GetImportDirectoryLen proto
 GetRVAtoFA proto dwRva:DWORD
+GetRVAtoVA proto dwRva:DWORD
 ClearPeData proto

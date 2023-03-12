@@ -1,1 +1,0 @@
-SetBaCommand proto dwAddr:DWORD, bIsBaE:DWORD, dwBaLen:DWORD, pDe:DWORD

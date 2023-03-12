@@ -8,7 +8,6 @@ include utils.inc
 include output_debug_handler.inc
 include bp_handler.inc
 include t_p_handler.inc
-include ba_handler.inc
 include bh_handler.inc
 include bm_handler.inc
 include pe_handler.inc
@@ -29,14 +28,16 @@ include r_handler.inc
 	g_bIsSinglePStep dd FALSE
 	g_bIsHardSingleStep dd FALSE; 硬件断点标志
 	g_bIsBmSingleStep dd FALSE  ;内存断点的单步标志 
-	
-	g_dwMmbpAddr dd 0 ;内存断点地址
-    g_dwMmbpLen  dd 0 ;内存断点长度 
-    g_dwMmbpOld  dd 0 ;原来的内存保护属性
     
    	g_dwBhLen dd 0 ; 硬件断点长度
    	g_dwBhType dd 0 ; 硬件断点类型
    	g_currHardBreakIdx dd 0; 当前触发的断点序号
+   	
+   	g_dwMmbmAddr dd 0
+   	g_dwMmbmLen dd 0
+   	g_dwMmbmType dd 0
+   	g_currMemBmOldAttr dd 0;
+   	g_currMemBmAddr dd 0;
     
     g_dwRunEnd   dd 0 ;运行结束地址
 
@@ -149,46 +150,71 @@ InputCommand proc uses ebx ecx
             ;设置断点
             mov @pAddr, eax 
             
-            ;解析参数 - 长度
-            invoke crt_strtoul, offset g_szCommand + 12, NULL, 16
-            .if eax == 0 || eax == -1 || (eax != 1 && eax != 2 && eax != 4)
-                invoke crt_printf, offset g_szCommandErrTip
-                .continue
-            .endif
-            mov g_dwBhLen, eax
-            
             ;解析参数 - 类型
-            mov eax, offset g_szCommand 
-            add eax, 14
-            .if byte ptr [eax] == 'e'
+            .if g_szCommand[12] == 'e'
             	mov g_dwBhType, 0
-            .elseif byte ptr [eax] == 'w'
+            .elseif g_szCommand[12] == 'w'
             	mov g_dwBhType, 1
-            .elseif byte ptr [eax] == 'a'
+            .elseif g_szCommand[12] == 'a'
             	mov g_dwBhType, 2
             .elseif
             	invoke crt_printf, offset g_szCommandErrTip
                 .continue
             .endif
             
+            ;解析参数 - 长度
+            invoke crt_strtoul, offset g_szCommand + 14, NULL, 16
+            .if g_szCommand[12] == 'e'
+            	mov eax, 1
+            .endif
+            .if eax == 0 || eax == -1 || (eax != 1 && eax != 2 && eax != 4)
+                invoke crt_printf, offset g_szCommandErrTip
+                .continue
+            .endif
+            mov g_dwBhLen, eax
+            
             invoke SetBhCommand, @pAddr, offset g_de, g_dwBhLen, g_dwBhType
+        .elseif g_szCommand[0] == 'b' && g_szCommand[1] == 'm' && g_szCommand[2] == 'l'
+        	invoke ShowBmList
+        .elseif g_szCommand[0] == 'b' && g_szCommand[1] == 'm' && g_szCommand[2] == 'p' &&g_szCommand[3] == 'l'
+        	invoke ShowBmPList
+        .elseif g_szCommand[0] == 'b' && g_szCommand[1] == 'm' && g_szCommand[2] == 'c'
+        	invoke crt_strtoul, offset g_szCommand + 4, NULL, 16
+        	.if eax == -1
+                invoke crt_printf, offset g_szCommandErrTip
+                .continue
+            .endif
+            .if eax == 0 && g_szCommand[4] != '0'
+            	mov eax, -1
+            .endif
+        	invoke ClearBmList, g_hProc, eax
        	.elseif g_szCommand[0] == 'b' && g_szCommand[1] == 'm'
             invoke crt_strtoul, offset g_szCommand + 3, NULL, 16
             .if eax == 0 || eax == -1
                 invoke crt_printf, offset g_szCommandErrTip
                 .continue
             .endif
-            mov g_dwMmbpAddr, eax
+            mov g_dwMmbmAddr, eax
+            
+            ;解析参数 - 类型
+            .if g_szCommand[12] == 'w'
+            	mov g_dwMmbmType, 0
+            .elseif g_szCommand[12] == 'r'
+            	mov g_dwMmbmType, 1
+            .elseif
+            	invoke crt_printf, offset g_szCommandErrTip
+                .continue
+            .endif
             
             ;解析参数 - 长度
-            invoke crt_strtoul, offset g_szCommand + 12, NULL, 16
+            invoke crt_strtoul, offset g_szCommand + 14, NULL, 16
             .if eax == 0 || eax == -1
                 invoke crt_printf, offset g_szCommandErrTip
                 .continue
             .endif
-            mov g_dwMmbpLen, eax
-            
-            invoke SetBmCommand, g_hProc, g_dwMmbpAddr, g_dwMmbpLen, offset g_dwMmbpOld
+            mov g_dwMmbmLen, eax
+
+            invoke SetBmCommand, g_hProc, g_dwMmbmAddr, g_dwMmbmLen, g_dwMmbmType
             
         .elseif g_szCommand[0] == 'd' && g_szCommand[1] == 'd'
         	invoke crt_strtoul, offset g_szCommand + 3, NULL, 16
@@ -240,6 +266,9 @@ InputCommand proc uses ebx ecx
              	invoke SetTCommand,offset g_de, offset g_bIsSingleTStep
             .endif
             ret
+        .elseif g_szCommand[0] == 'q'
+        	invoke ExitProcess, NULL 
+            ret   
         .endif
     .endw
 
@@ -248,12 +277,11 @@ InputCommand proc uses ebx ecx
 InputCommand endp
 
 
-OnExcept proc
+OnExcept proc uses esi edi
     LOCAL @dwStatus:DWORD
     LOCAL @bIsInputCmd:DWORD
     LOCAL @hThread:HANDLE
 	LOCAL @ctx:CONTEXT
-	LOCAL @dwOldProc:DWORD
 
     lea esi, g_de.u.Exception.pExceptionRecord
     assume esi:ptr EXCEPTION_RECORD
@@ -279,6 +307,7 @@ OnExcept proc
         .endif
         invoke InputCommand
     .elseif [esi].ExceptionCode == EXCEPTION_SINGLE_STEP
+    	mov g_currHardBreakIdx, 0
     	invoke FindBp, [esi].ExceptionAddress
     	.if eax != 0
     		invoke SetBp, g_hProc,[esi].ExceptionAddress, 1
@@ -292,11 +321,11 @@ OnExcept proc
      		invoke GetContext, addr @ctx, @hThread
      		.if g_currHardBreakIdx == 1
      			or @ctx.iDr7, 3
-     		.else if g_currHardBreakIdx == 2
+     		.elseif g_currHardBreakIdx == 2
      			or @ctx.iDr7, 12
-     		.else if g_currHardBreakIdx == 3
+     		.elseif g_currHardBreakIdx == 3
      			or @ctx.iDr7, 48
-     		.else if g_currHardBreakIdx == 4
+     		.elseif g_currHardBreakIdx == 4
      			or @ctx.iDr7, 192
      		.endif
     		invoke SetContext, addr @ctx, @hThread
@@ -305,9 +334,8 @@ OnExcept proc
         
          .if g_bIsBmSingleStep 
             mov g_bIsBmSingleStep, FALSE
-            
             ;重设内存断点
-            invoke SetBmCommand, g_hProc, g_dwMmbpAddr, g_dwMmbpLen, offset g_dwMmbpOld
+            invoke ResetBmCommand, g_hProc, g_currMemBmAddr
         .endif
         
         .if g_bIsSingleTStep == TRUE
@@ -398,21 +426,34 @@ OnExcept proc
         .endif
 
     .elseif [esi].ExceptionCode == EXCEPTION_ACCESS_VIOLATION
-        invoke VirtualProtectEx,g_hProc, g_dwMmbpAddr, g_dwMmbpLen, g_dwMmbpOld, addr @dwOldProc
+       	invoke FindBmInPage, [esi].ExceptionInformation[4]
+       	.if eax != 0
+       		mov edi, eax
+    		assume edi: ptr bmStruct
+    		mov g_currMemBmAddr, edi
+    		invoke VirtualProtectEx,g_hProc, [edi].m_dwAddr, [edi].m_dwLen, [edi].m_dwOldAttr, offset g_currMemBmOldAttr
+       	.endif
+
+    	invoke SetTF, offset g_de
+       	mov g_bIsBmSingleStep, TRUE
+    	
+    	invoke FindBm, [esi].ExceptionInformation[4]
+    	.if eax != 0
+    		mov edi, eax
+    		assume edi: ptr bmStruct
+    		mov g_currMemBmAddr, edi
         
-        invoke SetTF, offset g_de
-        mov g_bIsBmSingleStep, TRUE
-        
-        mov eax, [esi].ExceptionInformation[4]
-        mov ecx, g_dwMmbpAddr
-        add ecx, g_dwMmbpLen
-        .if eax >= g_dwMmbpAddr && eax < ecx
-            .if [esi].ExceptionInformation[0] == ACCESS_WRITE_EXCEPT
-                invoke crt_printf, offset g_szBmTip, eax
-                
+        	.if [esi].ExceptionInformation[0] == ACCESS_WRITE_EXCEPT && [edi].m_dwType == 0
+                invoke crt_printf, offset g_szBmWTip, [esi].ExceptionInformation[4]
+                invoke InputCommand
+            .elseif [edi].m_dwType == 1
+            	invoke crt_printf, offset g_szBmRTip, [esi].ExceptionInformation[4]
                 invoke InputCommand
             .endif
-        .endif
+        .elseif
+     
+    	.endif
+        
     .endif
     
     mov eax, @dwStatus

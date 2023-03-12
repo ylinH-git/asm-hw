@@ -16,5 +16,5 @@ GetFAtoRVA proto dwFa:DWORD
 GetFAtoVA proto dwFa:DWORD
 GetVAtoRVA proto dwVa:DWORD
 GetVAtoFA proto dwVa:DWORD
-FindFuncName proc uses ecx esi edi ebx edx hProc:DWORD, dwFuncAddr:DWORD
+FindFuncName proto uses ecx esi edi ebx edx hProc:DWORD, dwFuncAddr:DWORD
 ClearPeData proto

@@ -9,6 +9,7 @@ GetImportDirectoryAddr proto
 GetDataDirStructLen proto
 GetSectionHeadersLen proto
 GetImportDirectoryLen proto
+GetImportDllNameFAsAddr proto
 GetRVAtoFA proto dwRva:DWORD
 GetRVAtoVA proto dwRva:DWORD
 GetFAtoRVA proto dwFa:DWORD
