@@ -15,3 +15,7 @@ DecEip proto pDe:DWORD
 SetTF proto pDe:DWORD
 
 SplitPath proto pFilePath:DWORD
+
+GetFileName proto
+
+GetFileExt proto

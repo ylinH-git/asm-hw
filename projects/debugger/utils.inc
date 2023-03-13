@@ -8,6 +8,8 @@ ReadMemory proto hProc:HANDLE, dwAddr:DWORD, dwSize:DWORD, pBuf:DWORD
 
 ReadMemoryPartlyFromProcess proto hProc:DWORD,dwAddr:DWORD, dwSize:DWORD, pBuf:DWORD 
 
+IsMemoryNotNull proto pData:DWORD, dataSize:DWORD
+
 GetCurrEip proto pDe:DWORD
 
 GetAsm proto hProc:HANDLE, pCurBufAsm:DWORD, currDwEip:DWORD, pDwCodeLen:DWORD

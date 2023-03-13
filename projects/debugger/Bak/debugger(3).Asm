@@ -226,6 +226,8 @@ InputCommand proc uses ebx ecx
              	mov @currDwEip, eax
             .endif
             invoke HandlerDDCommand, g_hProc, @currDwEip
+        .elseif g_szCommand[0] == 'd' && g_szCommand[1] == 'u' && g_szCommand[2] == 'm' && g_szCommand[3] == 'p'
+        	invoke DumpPe, offset g_szFilePath
        	.elseif g_szCommand[0] == 't' && g_szCommand[1] == 'r'&& g_szCommand[2] == 'a'&& g_szCommand[3] == 'c'&& g_szCommand[4] == 'e'
             invoke crt_strtoul, offset g_szCommand + 6, NULL, 16
             .if eax == 0 || eax == -1

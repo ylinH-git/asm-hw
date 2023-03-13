@@ -14,6 +14,28 @@ include pe_handler.inc
 .code 
 _splitpath PROTO C :DWORD, :DWORD, :DWORD, :DWORD, :DWORD
 
+
+IsMemoryNotNull proc uses ecx edx ebx pData:DWORD, dataSize:DWORD
+	mov ebx, pData
+	add ebx, dataSize
+	dec ebx
+	
+	mov ecx, dataSize
+	.while TRUE
+		.if byte ptr [pData] != 0
+			mov eax, ecx
+			ret
+		.endif
+		dec pData
+		dec ecx
+		.break .if ecx == 0
+	.endw
+	
+	mov eax, FALSE
+	ret
+
+IsMemoryNotNull endp
+
 SplitPath proc pFilePath:DWORD
 	invoke _splitpath, pFilePath, offset g_szFileDrive, offset g_szFileDir, offset g_szFileName, offset g_szFileExt
 	ret
@@ -76,7 +98,7 @@ ReadMemoryPartlyFromProcess proc uses esi ecx ebx  hProc:DWORD,dwAddr:DWORD, dwS
   	  ret
   	.endif
 
-  	invoke ReadMemory, hProc, dwAddr, pBuf, dwSize
+  	invoke ReadMemory, hProc, dwAddr, dwSize, pBuf 
   	.if eax == NULL
     	mov eax, dwAddr
     	mov @addressPart,  eax
@@ -101,9 +123,9 @@ ReadMemoryPartlyFromProcess proc uses esi ecx ebx  hProc:DWORD,dwAddr:DWORD, dwS
     		.endif
     	
     		.if @memBasic.State == MEM_COMMIT
-    			mov eax, pBuf
-    			add eax, @readBytes
-    			invoke ReadMemory,hProc, @addressPart, @bytesToRead, eax
+    			mov ebx, pBuf
+    			add ebx, @readBytes
+    			invoke ReadMemory, hProc, @addressPart, @bytesToRead, ebx
     			.if eax == NULL
     				.break
     			.endif
@@ -111,7 +133,9 @@ ReadMemoryPartlyFromProcess proc uses esi ecx ebx  hProc:DWORD,dwAddr:DWORD, dwS
     		.elseif
     			mov ebx, pBuf
     			add ebx, @readBytes
+    			push ecx
     			invoke RtlZeroMemory, ebx, @bytesToRead
+    			pop ecx
     		.endif
     	
     		mov ecx, @readBytes
@@ -124,7 +148,7 @@ ReadMemoryPartlyFromProcess proc uses esi ecx ebx  hProc:DWORD,dwAddr:DWORD, dwS
     	.endw
 	
 		mov eax, dwSize
-		.if @readByte == eax
+		.if @readBytes == eax
 			mov eax, TRUE
 			ret
 		.endif

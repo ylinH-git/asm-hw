@@ -6,7 +6,7 @@ WriteMemory proto hProc:HANDLE, destAddr:DWORD, sourceAddr:DWORD, memSize: DWORD
 
 GetCurrEip proto pDe:DWORD
 
-GetAsm proto hProc:HANDLE, pCurBufAsm:DWORD, currDwEip:DWORD
+GetAsm proto hProc:HANDLE, pCurBufAsm:DWORD, currDwEip:DWORD, pDwCodeLen:DWORD
 
 PrintAsm proto hProc:HANDLE, pCurBufAsm:DWORD, currDwEip:DWORD, pDwCodeLen:DWORD, asmNum: DWORD
 

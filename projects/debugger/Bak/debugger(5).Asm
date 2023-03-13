@@ -483,11 +483,12 @@ main proc
     ;接受文件
     invoke crt_gets, offset g_szFilePath
     
+    invoke SplitPath, offset g_szFilePath
     
     invoke RtlZeroMemory, addr @si, size @si
     invoke RtlZeroMemory, addr @pi, size @pi
     
-    invoke GetPeData
+    invoke GetPeData, offset g_szFilePath
     
     ;建立调试会话
     invoke CreateProcess, NULL, offset g_szFilePath, NULL, NULL, FALSE, \

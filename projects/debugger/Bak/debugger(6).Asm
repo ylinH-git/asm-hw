@@ -487,10 +487,10 @@ main proc
     invoke RtlZeroMemory, addr @si, size @si
     invoke RtlZeroMemory, addr @pi, size @pi
     
-    invoke GetPeData
+    invoke GetPeData, offset g_szFilePath
     
     ;建立调试会话
-    invoke CreateProcess, NULL, offset g_szExe, NULL, NULL, FALSE, \
+    invoke CreateProcess, NULL, offset g_szFilePath, NULL, NULL, FALSE, \
             DEBUG_ONLY_THIS_PROCESS or CREATE_NEW_CONSOLE, NULL, NULL, addr @si, addr @pi
             
     .if eax == NULL

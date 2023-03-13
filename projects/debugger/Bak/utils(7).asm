@@ -14,6 +14,28 @@ include pe_handler.inc
 .code 
 _splitpath PROTO C :DWORD, :DWORD, :DWORD, :DWORD, :DWORD
 
+
+IsMemoryNotNull proc uses ecx edx ebx pData:DWORD, dataSize:DWORD
+	mov ebx, pData
+	add ebx, dataSize
+	dec ebx
+	
+	mov ecx, dataSize
+	.while TRUE
+		.if byte ptr [pData] != 0
+			mov eax, TRUE
+			ret
+		.endif
+		dec pData
+		dec ecx
+		.break .if ecx == 0
+	.endw
+	
+	mov eax, FALSE
+	ret
+
+IsMemoryNotNull endp
+
 SplitPath proc pFilePath:DWORD
 	invoke _splitpath, pFilePath, offset g_szFileDrive, offset g_szFileDir, offset g_szFileName, offset g_szFileExt
 	ret
@@ -64,63 +86,77 @@ ReadMemory proc hProc:HANDLE, dwAddr:DWORD, dwSize:DWORD, pBuf:DWORD
 
 ReadMemory endp
 
-ReadMemoryPartlyFromProcess proc uses esi ecx  hProc:DWORD,dwAddr:DWORD, dwSize:DWORD, pBuf:DWORD 
-  LOCAL @addressPart:DWORD
-  LOCAL @readBytes:DWORD
-  LOCAL @bytesToRead:DWORD
-  LOCAL @memBasic: MEMORY_BASIC_INFORMATION
+ReadMemoryPartlyFromProcess proc uses esi ecx ebx  hProc:DWORD,dwAddr:DWORD, dwSize:DWORD, pBuf:DWORD 
+  	LOCAL @addressPart:DWORD
+  	LOCAL @readBytes:DWORD
+  	LOCAL @bytesToRead:DWORD
+  	LOCAL @memBasic: MEMORY_BASIC_INFORMATION
 
-  invoke RtlZeroMemory, addr @memBasic, size MEMORY_BASIC_INFORMATION
-  .if hProc == NULL
-    mov eax, FALSE
-    ret
-  .endif
+  	invoke RtlZeroMemory, addr @memBasic, size MEMORY_BASIC_INFORMATION
+  	.if hProc == NULL
+  	  mov eax, FALSE
+  	  ret
+  	.endif
 
-  invoke ReadMemory, hProc, dwAddr, pBuf, dwSize
-  .if eax == NULL
-    mov eax, dwAddr
-    mov @addressPart,  eax
-    mov @readBytes, 0
-    mov ecx, @readBytes
-    .while ecx < dwSize
-    	push ecx
-   		invoke VirtualQueryEx, hProc, @addressPart, addr @memBasic, size MEMORY_BASIC_INFORMATION
-   		pop ecx
-    	.if eax == NULL
-      		ret
-    	.endif
-    	
-    	mov eax, @memBasic.RegionSize
-    	mov @bytesToRead, eax
-    	
-    	add eax, @readBytes
-    	.if eax > dwSize
-    		mov eax, dwSize
-    		sub eax, @readBytes
-    		mov eax @bytesToRead
-    	.endif
-    	
-    	.if @memBasic.State == MEM_COMMIT
-    		mov eax, pBuf
-    		add eax, @readBytes
-    		invoke ReadMemory,hProc, @addressPart, @bytesToRead, eax
-    		.if eax == NULL
-    			.break
-    		.endif
-    	.endif
-    	
+  	invoke ReadMemory, hProc, dwAddr, pBuf, dwSize
+  	.if eax == NULL
+    	mov eax, dwAddr
+    	mov @addressPart,  eax
+    	mov @readBytes, 0
     	mov ecx, @readBytes
-    	add ecx, @bytesToRead
-    	mov @readBytes, ecx
-    .endw
-
+    	.while ecx < dwSize
+    		push ecx
+   			invoke VirtualQueryEx, hProc, @addressPart, addr @memBasic, size MEMORY_BASIC_INFORMATION
+   			pop ecx
+    		.if eax == NULL
+      			ret
+    		.endif
+    	
+    		mov eax, @memBasic.RegionSize
+    		
+    		mov @bytesToRead, eax
+    		add eax, @readBytes
+    		.if eax > dwSize
+    			mov eax, dwSize
+    			sub eax, @readBytes
+    			mov @bytesToRead, eax
+    		.endif
+    	
+    		.if @memBasic.State == MEM_COMMIT
+    			mov eax, pBuf
+    			add eax, @readBytes
+    			invoke ReadMemory,hProc, @addressPart, @bytesToRead, eax
+    			.if eax == NULL
+    				.break
+    			.endif
+    		
+    		.elseif
+    			mov ebx, pBuf
+    			add ebx, @readBytes
+    			invoke RtlZeroMemory, ebx, @bytesToRead
+    		.endif
+    	
+    		mov ecx, @readBytes
+    		add ecx, @bytesToRead
+    		mov @readBytes, ecx
+    	
+    		mov eax, @memBasic.RegionSize
+    		add eax, @addressPart
+    		mov @addressPart, eax
+    	.endw
 	
+		mov eax, dwSize
+		.if @readBytes == eax
+			mov eax, TRUE
+			ret
+		.endif
+  	.elseif
+  		mov eax, TRUE
+  		ret
+  	.endif
 
-  .endif
-
-
-  mov eax, TRUE
-  ret
+	xor eax, eax
+  	ret
 ReadMemoryPartlyFromProcess endp
 
 WriteMemory proc hProc:HANDLE, destAddr:DWORD, sourceAddr:DWORD, memSize: DWORD
