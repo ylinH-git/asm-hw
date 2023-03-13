@@ -19,6 +19,7 @@ ShowModuleList proc uses ecx esi ebx
 	LOCAL @dllName[256]:BYTE
 	LOCAL @currDllAddr: HMODULE
 	LOCAL @tempName[256]:BYTE
+	LOCAO @hModuleNeedByte:DWORD
 	
 	invoke RtlZeroMemory, offset g_szModuleName, 256
 	
@@ -32,7 +33,10 @@ ShowModuleList proc uses ecx esi ebx
 	
 	invoke GetFileName
 	invoke crt_strcpy, offset g_szModuleName, eax
+	invoke GetFileExt
+	invoke crt_strcat, offset g_szModuleName, eax
 	
+	invoke EnumProcessModules, hProc, addr @currDllAddr, 4, addr @hModuleNeedByte
 	invoke GetModuleHandle, NULL
 	mov @currDllAddr, eax
 	invoke crt_printf, offset g_szModuleListFormat, @currDllAddr, offset g_szModuleName

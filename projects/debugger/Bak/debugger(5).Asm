@@ -490,7 +490,7 @@ main proc
     invoke GetPeData
     
     ;建立调试会话
-    invoke CreateProcess, NULL, offset g_szExe, NULL, NULL, FALSE, \
+    invoke CreateProcess, NULL, offset g_szFilePath, NULL, NULL, FALSE, \
             DEBUG_ONLY_THIS_PROCESS or CREATE_NEW_CONSOLE, NULL, NULL, addr @si, addr @pi
             
     .if eax == NULL

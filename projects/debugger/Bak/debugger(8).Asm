@@ -494,6 +494,7 @@ main proc
             
     .if eax == NULL
     	invoke crt_printf, offset g_szFileErrorTip
+    	ret
     .endif
             
     mov eax, @pi.hProcess

@@ -31,7 +31,9 @@ ShowModuleList proc uses ecx esi ebx
 	mov @pFile, eax
 	
 	invoke GetFileName
-	invoke crt_strcpy, offset g_szModuleName,eax
+	invoke crt_strcpy, offset g_szModuleName, eax
+	invoke GetFileExt
+	invoke crt_strcat, offset g_szModuleName, eax
 	
 	invoke GetModuleHandle, NULL
 	mov @currDllAddr, eax

@@ -13,3 +13,5 @@ PrintAsm proto hProc:HANDLE, pCurBufAsm:DWORD, currDwEip:DWORD, pDwCodeLen:DWORD
 DecEip proto pDe:DWORD
 
 SetTF proto pDe:DWORD
+
+SplitPath proto pFilePath:DWORD

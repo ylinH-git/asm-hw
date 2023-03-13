@@ -1,1 +1,1 @@
-ShowModuleList proto
+ShowModuleList proto  hProc:DWORD

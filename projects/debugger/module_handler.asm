@@ -12,13 +12,14 @@ include pe_handler.inc
 	g_szModuleName          db 256 dup(0)
 .code 
 
-ShowModuleList proc uses ecx esi ebx
+ShowModuleList proc uses ecx esi ebx hProc:DWORD
 	LOCAL @importDirectoryLen: DWORD
 	LOCAL @importDllNameFAsAddr: DWORD
 	LOCAL @pFile:DWORD
 	LOCAL @dllName[256]:BYTE
 	LOCAL @currDllAddr: HMODULE
 	LOCAL @tempName[256]:BYTE
+	LOCAL @hModuleNeedByte:DWORD
 	
 	invoke RtlZeroMemory, offset g_szModuleName, 256
 	
@@ -35,8 +36,7 @@ ShowModuleList proc uses ecx esi ebx
 	invoke GetFileExt
 	invoke crt_strcat, offset g_szModuleName, eax
 	
-	invoke GetModuleHandle, NULL
-	mov @currDllAddr, eax
+	invoke EnumProcessModules, hProc, addr @currDllAddr, 4, addr @hModuleNeedByte
 	invoke crt_printf, offset g_szModuleListFormat, @currDllAddr, offset g_szModuleName
 	
 	xor ecx, ecx

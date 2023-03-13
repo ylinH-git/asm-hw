@@ -41,6 +41,7 @@ include dump_handler.inc
    	g_dwMmbmType dd 0
    	g_currMemBmOldAttr dd 0;
    	g_currMemBmAddr dd 0;
+    g_szFullPath db 256 dup(0)
     
     g_dwRunEnd   dd 0 ;运行结束地址
 

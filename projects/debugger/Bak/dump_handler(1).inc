@@ -1,1 +1,1 @@
-DumpPe proc pFilePath:DWORD
+DumpProcess proc hProc:DWORD, pFilePath:DWORD

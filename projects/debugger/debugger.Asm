@@ -258,7 +258,7 @@ InputCommand proc uses ebx ecx
 
             ret
         .elseif g_szCommand[0] == 'm' && g_szCommand[1] == 'l'
-        	invoke ShowModuleList
+        	invoke ShowModuleList, g_hProc
         .elseif g_szCommand[0] == 'u'
         	invoke crt_strtoul, offset g_szCommand + 2, NULL, 16
             .if eax != 0 && eax != -1

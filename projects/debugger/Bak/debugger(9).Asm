@@ -492,6 +492,10 @@ main proc
     invoke CreateProcess, NULL, offset g_szExe, NULL, NULL, FALSE, \
             DEBUG_ONLY_THIS_PROCESS or CREATE_NEW_CONSOLE, NULL, NULL, addr @si, addr @pi
             
+    .if eax == NULL
+    	invoke crt_printf, offset g_szFileErrorTip
+    .endif
+            
     mov eax, @pi.hProcess
     mov g_hProc, eax
     

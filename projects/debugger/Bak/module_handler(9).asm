@@ -9,6 +9,7 @@ include pe_handler.inc
 .data
 	g_szModuleListHeader	db "µØÖ·        Ä£¿éÃû³Æ",0dh, 0ah, 0
 	g_szModuleListFormat	db "0x%08X  %s", 0dh, 0ah, 0
+	g_szModuleName          db 256 dup(0)
 .code 
 
 ShowModuleList proc uses ecx esi ebx
@@ -18,6 +19,8 @@ ShowModuleList proc uses ecx esi ebx
 	LOCAL @dllName[256]:BYTE
 	LOCAL @currDllAddr: HMODULE
 	LOCAL @tempName[256]:BYTE
+	
+	invoke RtlZeroMemory, offset g_szModuleName, 256
 	
 	invoke crt_printf, offset g_szModuleListHeader
 	invoke GetImportDirectoryLen
