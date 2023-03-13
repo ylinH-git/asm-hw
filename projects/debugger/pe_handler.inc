@@ -1,4 +1,4 @@
-GetPeData proto
+GetPeData proto pFilePath:DWORD
 GetDosStructAddr proto
 GetNtStructAddr proto
 GetFileHStructAddr proto

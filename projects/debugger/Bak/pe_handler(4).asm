@@ -616,10 +616,10 @@ FindFuncName proc uses ecx esi edi ebx edx hProc:DWORD, dwFuncAddr:DWORD
 		pop ecx
 		.if ecx != NULL
 			.if ecx == dwFuncAddr
-				push ebx
+				push edx
 				mov eax, size DWORD
 				mov ebx, @currImportFuncsLen
-				mul edx
+				mul ebx
 				mov ebx, eax
 				add ebx, g_importDllNameFAs
 				mov ebx, dword ptr [ebx]

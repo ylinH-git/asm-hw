@@ -6,7 +6,32 @@ include global.inc
 include disasm.inc
 include pe_handler.inc
 
+.data
+	g_szFileName db 256 dup(0)
+	g_szFileExt db 256 dup(0)
+	g_szFileDrive db 256 dup(0)
+	g_szFileDir db 256 dup(0)
 .code 
+
+SplitPath proc pFilePath:DWORD
+	invoke _splitpath, pFilePath, offset g_szFileDrive, offset g_szFileDir, offset g_szFileName, offset g_szFileExt
+	ret
+SplitPath endp
+
+GetFileName proc
+	
+	mov eax, offset g_szFileName
+	ret
+
+GetFileName endp
+
+GetFileExt proc
+
+	mov eax, offset g_szFileExt
+	ret
+
+GetFileExt endp
+
 ; 获取上下文
 GetContext proc pCtx:ptr CONTEXT, hThread:HANDLE
     invoke RtlZeroMemory, pCtx, size CONTEXT
@@ -90,7 +115,7 @@ PrintFunc proc uses ecx hProc:DWORD,pAsmBuf:DWORD
 	ret
 PrintFunc endp
 
-GetAsm proc uess ebx hProc:HANDLE, pCurBufAsm:DWORD, currDwEip:DWORD, pDwCodeLen:DWORD
+GetAsm proc uses ebx hProc:HANDLE, pCurBufAsm:DWORD, currDwEip:DWORD, pDwCodeLen:DWORD
     LOCAL @bufCode[16]:BYTE
     LOCAL @dwBytesReadWrite:DWORD
    

@@ -9,15 +9,18 @@ include pe_handler.inc
 .data
 	g_szModuleListHeader	db "µØÖ·        Ä£¿éÃû³Æ",0dh, 0ah, 0
 	g_szModuleListFormat	db "0x%08X  %s", 0dh, 0ah, 0
+	g_szModuleName          db 256 dup(0)
 .code 
 
-ShowModuleList proc uses ecx esi
+ShowModuleList proc uses ecx esi ebx
 	LOCAL @importDirectoryLen: DWORD
 	LOCAL @importDllNameFAsAddr: DWORD
 	LOCAL @pFile:DWORD
 	LOCAL @dllName[256]:BYTE
 	LOCAL @currDllAddr: HMODULE
 	LOCAL @tempName[256]:BYTE
+	
+	invoke RtlZeroMemory, offset g_szModuleName, 256
 	
 	invoke crt_printf, offset g_szModuleListHeader
 	invoke GetImportDirectoryLen
@@ -27,6 +30,9 @@ ShowModuleList proc uses ecx esi
 	invoke GetFileAddr
 	mov @pFile, eax
 	
+	invoke GetModuleHandle, NULL
+	mov @currDllAddr, eax
+	invoke crt_printf, offset g_szModuleListFormat, @currDllAddr, offset g_szExe
 	
 	xor ecx, ecx
 	mov esi, @importDllNameFAsAddr
@@ -34,8 +40,9 @@ ShowModuleList proc uses ecx esi
 		push ecx
 		invoke RtlZeroMemory, addr @dllName, 256
 		invoke RtlZeroMemory, addr @tempName, 256
-		invoke crt_fseek, g_pFile, esi, SEEK_SET
-		invoke crt_fread, addr @tempName, 1, 256, g_pFile
+		mov ebx, dword ptr [esi]
+		invoke crt_fseek, @pFile, ebx, SEEK_SET
+		invoke crt_fread, addr @tempName, 1, 256, @pFile
 		invoke crt_strcpy, addr @dllName, addr @tempName
 		invoke GetModuleHandle,addr @dllName
 		mov @currDllAddr, eax

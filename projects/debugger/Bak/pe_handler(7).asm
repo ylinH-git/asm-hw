@@ -329,7 +329,7 @@ GetImportDirectory proc uses esi ebx edx
 	invoke crt_fread, g_importDescriptors, 1, ebx, g_pFile
 	
 	xor ecx, ecx
-	.if ecx < g_importDescriptorLen
+	.while ecx < g_importDescriptorLen
 		mov eax, size DWORD
 		mul ecx
 		mov ebx, eax
@@ -363,7 +363,7 @@ GetImportDirectory proc uses esi ebx edx
 			inc dword ptr [eax]
 		.endw
 		inc ecx
-	.endif
+	.endw
 	
 	invoke crt_free, @tempImport
 	invoke crt_free, @allZero

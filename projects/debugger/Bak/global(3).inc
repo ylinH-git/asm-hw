@@ -35,16 +35,18 @@ bmStruct ends
 
 
 .const
-	g_szExe 						db "test.exe", 0
+	g_szFileErrorTip                db "文件打开失败", 0dh, 0ah, 0
+	g_szFileTip                     db "请输入要调试的文件：", 0dh, 0ah, 0
 	g_szSystemBegin 				db "start debugging...", 0dh, 0ah, 0
     g_szOUTPUT_DEBUG_STRING_EVENT  	db "OUTPUT_DEBUG_STRING_EVENT",0
     g_szCommandErrTip              	db "命令出错", 0dh, 0ah, 0
    	g_szSystemBp					db "命中系统断点:0x", 0
    	g_szCustomBp					db "命中一般断点:0x", 0
-   	g_szBhETip                       db "命中硬件执行断点 %08X", 0dh, 0ah, 0
+   	g_szBhETip                      db "命中硬件执行断点 %08X", 0dh, 0ah, 0
    	g_szBhATip                      db "命中硬件访问断点 %08X", 0dh, 0ah, 0
    	g_szBhWTip                      db "命中硬件写入断点 %08X", 0dh, 0ah, 0
-   	g_szBmTip                      	db "命中内存写入断点 %08X", 0dh, 0ah, 0
+   	g_szBmWTip                      db "命中内存写入断点 %08X", 0dh, 0ah, 0
+   	g_szBmRTip                      db "命中内存访问断点 %08X", 0dh, 0ah, 0
     g_szFmt                        	db "%s",0dh, 0ah, 0
     g_szBpFmt                       db "%s%+08X",0dh, 0ah, 0
     g_szAsmFmt                      db "0x%08X %s",0dh, 0ah, 0
@@ -52,6 +54,7 @@ bmStruct ends
     g_szCall    					db "call", 0
     g_szJmp   						db "jmp", 0
     g_szPtr   						db "ptr", 0
+    g_szPoint						db ".", 0
     g_szFuncAsmFmt                  db "0x%08X %s <%s>",0dh, 0ah, 0
     g_szCurFuncAsmFmt               db "0x%08X %s <%s> <==== ",0dh, 0ah, 0
     g_szRn 							db 0dh, 0ah, 0

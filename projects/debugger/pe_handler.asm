@@ -438,8 +438,8 @@ GetFileAddr proc
 
 GetFileAddr endp
 
-GetPeData proc
-	invoke crt_fopen, offset g_szExe, offset g_fileFlag
+GetPeData proc pFilePath:DWORD
+	invoke crt_fopen, pFilePath, offset g_fileFlag
 	mov g_pFile, eax
 	.if eax == 0
 		invoke crt_printf, offset g_peErr

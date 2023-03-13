@@ -431,6 +431,13 @@ GetImportDirectoryLen proc
 	ret
 GetImportDirectoryLen endp
 
+GetFileAddr proc
+	
+	mov eax, g_pFile
+	ret
+
+GetFileAddr endp
+
 GetPeData proc
 	invoke crt_fopen, offset g_szExe, offset g_fileFlag
 	mov g_pFile, eax

@@ -6,7 +6,25 @@ include global.inc
 include disasm.inc
 include pe_handler.inc
 
+.data
+	g_szFileName db 256 dup(0)
+	g_szFileExt db 256 dup(0)
 .code 
+
+GetFileName proc pFilePath:DWORD
+	
+	
+	ret
+
+GetFileName endp
+
+GetFileExt proc pFilePath:DWORD
+	
+	
+	ret
+
+GetFileExt endp
+
 ; 获取上下文
 GetContext proc pCtx:ptr CONTEXT, hThread:HANDLE
     invoke RtlZeroMemory, pCtx, size CONTEXT
@@ -90,14 +108,15 @@ PrintFunc proc uses ecx hProc:DWORD,pAsmBuf:DWORD
 	ret
 PrintFunc endp
 
-GetAsm proc hProc:HANDLE, pCurBufAsm:DWORD, currDwEip:DWORD
+GetAsm proc uses ebx hProc:HANDLE, pCurBufAsm:DWORD, currDwEip:DWORD, pDwCodeLen:DWORD
     LOCAL @bufCode[16]:BYTE
     LOCAL @dwBytesReadWrite:DWORD
-    LOCAL @funcFullNameAddr:DWORD
    
     invoke ReadProcessMemory, hProc, currDwEip, addr @bufCode, 16, addr @dwBytesReadWrite
     invoke DisasmLine, addr @bufCode, 16, currDwEip, pCurBufAsm
-    
+    mov ebx, pDwCodeLen
+    mov [ebx], eax
+    ret
 GetAsm endp
 
 PrintAsm proc uses ecx ebx hProc:HANDLE, pCurBufAsm:DWORD, currDwEip:DWORD, pDwCodeLen:DWORD, asmNum: DWORD

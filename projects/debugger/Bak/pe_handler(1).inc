@@ -1,4 +1,4 @@
-GetPeData proto
+GetPeData proto GetPeData proc pFilePath:DWORD
 GetDosStructAddr proto
 GetNtStructAddr proto
 GetFileHStructAddr proto
@@ -10,6 +10,7 @@ GetDataDirStructLen proto
 GetSectionHeadersLen proto
 GetImportDirectoryLen proto
 GetImportDllNameFAsAddr proto
+GetFileAddr proto
 GetRVAtoFA proto dwRva:DWORD
 GetRVAtoVA proto dwRva:DWORD
 GetFAtoRVA proto dwFa:DWORD

@@ -14,6 +14,8 @@ include pe_handler.inc
 include dd_handler.inc
 include r_handler.inc
 include help_handler.inc
+include module_handler.inc
+include dump_handler.inc
 
 .data
 	g_hProc  HANDLE 0
@@ -39,6 +41,7 @@ include help_handler.inc
    	g_dwMmbmType dd 0
    	g_currMemBmOldAttr dd 0;
    	g_currMemBmAddr dd 0;
+    g_szFilePath db 256 dup(0)
     
     g_dwRunEnd   dd 0 ;运行结束地址
 
@@ -223,6 +226,7 @@ InputCommand proc uses ebx ecx
              	mov @currDwEip, eax
             .endif
             invoke HandlerDDCommand, g_hProc, @currDwEip
+        .elseif g_szCommand[0] == 'd' && g_szCommand[1] == 'u' && g_szCommand[2] == 'm' && g_szCommand[3] == 'p'
        	.elseif g_szCommand[0] == 't' && g_szCommand[1] == 'r'&& g_szCommand[2] == 'a'&& g_szCommand[3] == 'c'&& g_szCommand[4] == 'e'
             invoke crt_strtoul, offset g_szCommand + 6, NULL, 16
             .if eax == 0 || eax == -1
@@ -476,14 +480,25 @@ main proc
     LOCAL @pi:PROCESS_INFORMATION
     LOCAL @dwStatus:DWORD
     
+    invoke crt_printf, offset g_szFileTip
+    ;接受文件
+    invoke crt_gets, offset g_szFilePath
+    
+    invoke SplitPath, offset g_szFilePath
+    
     invoke RtlZeroMemory, addr @si, size @si
     invoke RtlZeroMemory, addr @pi, size @pi
     
-    invoke GetPeData
+    invoke GetPeData, offset g_szFilePath
     
     ;建立调试会话
-    invoke CreateProcess, NULL, offset g_szExe, NULL, NULL, FALSE, \
+    invoke CreateProcess, NULL, offset g_szFilePath, NULL, NULL, FALSE, \
             DEBUG_ONLY_THIS_PROCESS or CREATE_NEW_CONSOLE, NULL, NULL, addr @si, addr @pi
+            
+    .if eax == NULL
+    	invoke crt_printf, offset g_szFileErrorTip
+    	ret
+    .endif
             
     mov eax, @pi.hProcess
     mov g_hProc, eax

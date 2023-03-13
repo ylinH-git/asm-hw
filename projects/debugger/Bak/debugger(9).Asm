@@ -13,6 +13,9 @@ include bm_handler.inc
 include pe_handler.inc
 include dd_handler.inc
 include r_handler.inc
+include help_handler.inc
+include module_handler.inc
+include dump_handler.inc
 
 .data
 	g_hProc  HANDLE 0
@@ -251,6 +254,8 @@ InputCommand proc uses ebx ecx
             .endif
 
             ret
+        .elseif g_szCommand[0] == 'm' && g_szCommand[1] == 'l'
+        	invoke ShowModuleList
         .elseif g_szCommand[0] == 'u'
         	invoke crt_strtoul, offset g_szCommand + 2, NULL, 16
             .if eax != 0 && eax != -1
@@ -259,6 +264,8 @@ InputCommand proc uses ebx ecx
             invoke PrintAsm, g_hProc,addr @curBufAsm, @currDwEip, addr @dwCodeLen, 8
          .elseif g_szCommand[0] == 'r'
             invoke HandlerRCommand, offset g_de
+         .elseif g_szCommand[0] == 'h'
+        	invoke ShowHelper
         .elseif g_szCommand[0] == 'g'
         	invoke crt_strtoul, offset g_szCommand + 2, NULL, 16
             .if eax != 0 && eax != -1
@@ -266,6 +273,11 @@ InputCommand proc uses ebx ecx
              	invoke SetTCommand,offset g_de, offset g_bIsSingleTStep
             .endif
             ret
+        .elseif g_szCommand[0] == 'q'
+        	invoke ExitProcess, NULL 
+            ret
+        .elseif
+        	invoke crt_printf, offset g_szCommandErrTip   
         .endif
     .endw
 
@@ -465,6 +477,11 @@ main proc
     LOCAL @si:STARTUPINFO
     LOCAL @pi:PROCESS_INFORMATION
     LOCAL @dwStatus:DWORD
+    
+    invoke crt_printf, offset g_szFileTip
+    ;接受文件
+    invoke crt_gets, offset g_szExe
+    
     
     invoke RtlZeroMemory, addr @si, size @si
     invoke RtlZeroMemory, addr @pi, size @pi
