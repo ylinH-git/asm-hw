@@ -15,6 +15,24 @@ include pe_handler.inc
 _splitpath PROTO C :DWORD, :DWORD, :DWORD, :DWORD, :DWORD
 
 
+HasAddr proc uses ecx ebx pAddr:DWORD
+	xor ecx, ecx
+	mov ebx, pAddr
+	.while ecx < 8
+		.if byte ptr [ebx] < 30h || (byte ptr [ebx] > 39h  && byte ptr [ebx] < 41h) || (byte ptr [ebx] > 46h  && byte ptr [ebx] < 61h) || byte ptr [ebx] > 66h
+			mov eax, 0
+			ret
+		.endif
+		
+		inc ebx
+		inc ecx
+	.endw
+	
+	mov eax, 1
+	ret
+HasAddr endp
+
+
 IsMemoryNotNull proc uses ecx edx ebx pData:DWORD, dataSize:DWORD
 	mov ebx, pData
 	add ebx, dataSize

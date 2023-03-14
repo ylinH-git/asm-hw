@@ -231,7 +231,6 @@ ReadSectionFrom proc uses esi ecx edx readOffset:DWORD, pPeFileSection:DWORD
 	mov [esi].dataSize, 0
 	mov eax, [esi].normalSize
 	mov @readSize, eax
-	invoke crt_printf, offset g_szDumpDone
 	.if readOffset == NULL || @readSize == NULL
 		mov eax, TRUE
 		invoke crt_free, @pData

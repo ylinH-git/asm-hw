@@ -6,9 +6,6 @@ include global.inc
 include utils.inc
 include bp_handler.inc
 
-externdef g_bIsSingleTStep:dword
-externdef g_bIsSinglePStep:dword
-
 .data
 	g_pPTFOldCode dd 0
 .code 
@@ -26,7 +23,7 @@ SetPTF proc uses ecx ebx edx hProc:HANDLE, dwAddr:DWORD
 
 SetPTF endp
 
-RestorePTF proc uses ebx ecx hProc:HANDLE, dwPTFAddr:DWORD, pDe:DWORD
+RestorePTF proc uses ebx ecx hProc:HANDLE, dwPTFAddr:DWORD, pDe:DWORD, pBIsPStep:DWORD
 	invoke FindBp, dwPTFAddr
     .if eax != 0
     	mov ebx, eax
@@ -41,7 +38,8 @@ RestorePTF proc uses ebx ecx hProc:HANDLE, dwPTFAddr:DWORD, pDe:DWORD
     	invoke WriteMemory, hProc, dwPTFAddr, offset g_pPTFOldCode , 1
     .endif
     invoke DecEip, pDe
-    mov g_bIsSinglePStep, FALSE
+    mov eax, pBIsPStep
+    mov dword ptr [eax], FALSE
     ret
 
 RestorePTF endp
@@ -52,4 +50,29 @@ SetTCommand proc pDe:DWORD, pBIsTStep:DWORD
   	invoke SetTF, pDe
    	ret
 SetTCommand endp
+
+
+HandlerPCommand proc uses ecx ebx hProc:DWORD, pDe:DWORD, pCurBufAsm:DWORD, pBIsSingleTStep:DWORD, dwCodeLen:DWORD, pCurrDwEip:DWORD, pDwPTFAddr:DWORD
+	
+    invoke crt_strstr, pCurBufAsm, offset g_szCall
+    .if eax == NULL
+    	invoke SetTCommand, pDe, pBIsSingleTStep
+    .else
+    	mov eax, pBIsSingleTStep
+      	mov dword ptr [eax], TRUE
+        mov eax, dwCodeLen
+        mov ebx, pCurrDwEip
+        mov ecx, dword ptr [ebx]
+        add ecx, eax
+        mov dword ptr [ebx], ecx
+        mov eax, dword ptr [ebx]
+        mov ebx, pDwPTFAddr
+        mov dword ptr [ebx], eax
+        mov ebx, pCurrDwEip
+        mov ecx, dword ptr [ebx]
+        invoke SetPTF, hProc, ecx
+   	.endif
+	ret
+
+HandlerPCommand endp
 end

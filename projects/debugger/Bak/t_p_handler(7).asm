@@ -38,16 +38,38 @@ RestorePTF proc uses ebx ecx hProc:HANDLE, dwPTFAddr:DWORD, pDe:DWORD, pBIsPStep
     	invoke WriteMemory, hProc, dwPTFAddr, offset g_pPTFOldCode , 1
     .endif
     invoke DecEip, pDe
-    mov ebx, pBIsPStep
-    mov [ebx], FALSE
+    mov eax, pBIsPStep
+    mov dword ptr [eax], FALSE
     ret
 
 RestorePTF endp
 
 SetTCommand proc pDe:DWORD, pBIsTStep:DWORD
 	mov eax, pBIsTStep
-  	mov [eax], TRUE
+  	mov dword ptr [eax], TRUE
   	invoke SetTF, pDe
    	ret
 SetTCommand endp
+
+
+HandlerPCommand proc uses ecx hProc:DWORD, pDe:DWORD, pCurBufAsm:DWORD, pBIsSingleTStep:DWORD, dwCodeLen:DWORD, pCurrDwEip:DWORD, pDwPTFAddr:DWORD
+	
+    invoke crt_strstr, pCurBufAsm, offset g_szCall
+    .if eax == NULL
+    	invoke SetTCommand, pDe, pBIsSingleTStep
+    .else
+    	mov eax, pBIsSingleTStep
+      	mov dword ptr [eax], TRUE
+        mov eax, @dwCodeLen
+        mov ecx, dword ptr [pCurrDwEip]
+        add ecx, eax
+        mov dword ptr [pCurrDwEip], ecx
+        mov eax, dword ptr [pCurrDwEip]
+        mov dword ptr [pDwPTFAddr], eax
+        mov ecx, dword ptr [pCurrDwEip]
+        invoke SetPTF, hProc, ecx
+   	.endif
+	ret
+
+HandlerPCommand endp
 end

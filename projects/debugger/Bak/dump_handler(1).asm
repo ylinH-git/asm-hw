@@ -572,6 +572,11 @@ DumpProcess proc uses esi ecx ebx hProc:DWORD
     	invoke WriteFile, @hDumpFile, g_pDosHeader, size IMAGE_DOS_HEADER, addr @dwBytesWrited, NULL
     	mov eax, @dwBytesWrited
     	add @dwFileOffset, eax
+    	
+    	.if g_dosStubSize && g_pDosStub
+    		invoke WriteFile, @hDumpFile, g_pDosStub, g_dosStubSize, addr @dwBytesWrited, NULL
+    	.endif
+    	
     	invoke WriteFile, @hDumpFile, g_pNTHeader, size IMAGE_NT_HEADERS, addr @dwBytesWrited, NULL
     	mov eax, @dwBytesWrited
     	add @dwFileOffset, eax

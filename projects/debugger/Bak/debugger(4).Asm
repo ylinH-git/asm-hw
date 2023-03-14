@@ -16,6 +16,7 @@ include r_handler.inc
 include help_handler.inc
 include module_handler.inc
 include dump_handler.inc
+include e_handler.inc
 
 .data
 	g_hProc  HANDLE 0
@@ -44,6 +45,7 @@ include dump_handler.inc
     g_szFilePath db 256 dup(0)
     
     g_dwRunEnd   dd 0 ;运行结束地址
+    g_dwRunRet   dd 0 ;运行到返回的标记
 
 
 .code 
@@ -60,10 +62,26 @@ InputCommand proc uses ebx ecx
     LOCAL @bIsBaE:DWORD
     LOCAL @pAddr:DWORD
     LOCAL @dwBaLen:DWORD
+    LOCAL @nextPosOffset:DWORD
+    LOCAL @rReg:DWORD
+    LOCAL @dwVal:DWORD
     
     invoke RtlZeroMemory, addr @curBufAsm, 64
     invoke GetCurrEip,offset g_de
     mov @currDwEip, eax
+    
+    ;判断运行到返回
+    .if g_dwRunRet
+    	invoke GetAsm, g_hProc, addr @curBufAsm, @currDwEip, addr @dwCodeLen
+    	invoke crt_strstr, addr @curBufAsm, offset g_szRet
+    	.if eax == NULL
+    		;run没有结束
+        	invoke HandlerPCommand ,g_hProc, offset g_de, addr @curBufAsm, offset g_bIsSingleTStep,offset g_bIsSinglePStep, @dwCodeLen, addr @currDwEip, offset g_dwPTFAddr
+        	ret	
+    	.elseif 
+    		mov g_dwRunRet, FALSE
+    	.endif 
+    .endif
     
     ;判断运行功能是否有终点
     mov eax, g_dwRunEnd
@@ -74,17 +92,7 @@ InputCommand proc uses ebx ecx
     		invoke GetAsm, g_hProc, addr @curBufAsm, @currDwEip, addr @dwCodeLen
     		pop eax
             ;run没有结束
-            invoke crt_strstr, addr @curBufAsm, offset g_szCall
-        	 .if eax == NULL
-        	 	invoke SetTCommand, offset g_de, offset g_bIsSingleTStep
-            .else
-            	mov g_bIsSinglePStep, TRUE
-                mov eax, @dwCodeLen
-            	add @currDwEip, eax
-            	mov eax, @currDwEip
-            	mov g_dwPTFAddr, eax
-            	invoke SetPTF, g_hProc, @currDwEip
-            .endif
+            invoke HandlerPCommand ,g_hProc, offset g_de, addr @curBufAsm, offset g_bIsSingleTStep,offset g_bIsSinglePStep, @dwCodeLen, addr @currDwEip, offset g_dwPTFAddr
             ret
         .else
             ;run结束
@@ -227,6 +235,15 @@ InputCommand proc uses ebx ecx
             .endif
             invoke HandlerDDCommand, g_hProc, @currDwEip
         .elseif g_szCommand[0] == 'd' && g_szCommand[1] == 'u' && g_szCommand[2] == 'm' && g_szCommand[3] == 'p'
+        	invoke DumpProcess, g_hProc
+        .elseif g_szCommand[0] == 'e'
+        	invoke HasAddr, offset g_szCommand + 2
+        	.if eax != NULL
+        		invoke HandlerECommand, g_hProc, @currDwEip, offset g_szCommand + 11
+        	.elseif	
+        		invoke HandlerECommand, g_hProc, @currDwEip, offset g_szCommand + 2
+        	.endif
+        	
        	.elseif g_szCommand[0] == 't' && g_szCommand[1] == 'r'&& g_szCommand[2] == 'a'&& g_szCommand[3] == 'c'&& g_szCommand[4] == 'e'
             invoke crt_strtoul, offset g_szCommand + 6, NULL, 16
             .if eax == 0 || eax == -1
@@ -243,21 +260,10 @@ InputCommand proc uses ebx ecx
             invoke SetTCommand, offset g_de, offset g_bIsSingleTStep
             ret
         .elseif g_szCommand[0] == 'p'
-        	invoke crt_strstr, addr @curBufAsm, offset g_szCall
-        	 .if eax == NULL
-        	 	invoke SetTCommand, offset g_de, offset g_bIsSingleTStep
-            .else
-            	mov g_bIsSinglePStep, TRUE
-                mov eax, @dwCodeLen
-            	add @currDwEip, eax
-            	mov eax, @currDwEip
-            	mov g_dwPTFAddr, eax
-            	invoke SetPTF, g_hProc, @currDwEip
-            .endif
-
+        	invoke HandlerPCommand ,g_hProc, offset g_de, addr @curBufAsm, offset g_bIsSingleTStep,offset g_bIsSinglePStep, @dwCodeLen, addr @currDwEip, offset g_dwPTFAddr
             ret
         .elseif g_szCommand[0] == 'm' && g_szCommand[1] == 'l'
-        	invoke ShowModuleList
+        	invoke ShowModuleList, g_hProc
         .elseif g_szCommand[0] == 'u'
         	invoke crt_strtoul, offset g_szCommand + 2, NULL, 16
             .if eax != 0 && eax != -1
@@ -265,10 +271,79 @@ InputCommand proc uses ebx ecx
             .endif
             invoke PrintAsm, g_hProc,addr @curBufAsm, @currDwEip, addr @dwCodeLen, 8
          .elseif g_szCommand[0] == 'r'
-            invoke HandlerRCommand, offset g_de
+         	mov @rReg, 0
+         	mov @dwVal, 0
+         	mov @nextPosOffset, 0
+         	.if g_szCommand[2] == 'e' && g_szCommand[3] == 'a' && g_szCommand[4] == 'x'
+         		mov @nextPosOffset, 6
+         		mov @rReg, 1
+         	.elseif g_szCommand[2] == 'e' && g_szCommand[3] == 'b' && g_szCommand[4] == 'x'
+         		mov @nextPosOffset, 6
+         		mov @rReg, 2
+         	.elseif g_szCommand[2] == 'e' && g_szCommand[3] == 'c' && g_szCommand[4] == 'x'
+         		mov @nextPosOffset, 6
+         		mov @rReg, 3
+         	.elseif g_szCommand[2] == 'e' && g_szCommand[3] == 'd' && g_szCommand[4] == 'x'
+         		mov @nextPosOffset, 6
+         		mov @rReg, 4
+         	.elseif g_szCommand[2] == 'e' && g_szCommand[3] == 's' && g_szCommand[4] == 'i'
+         		mov @nextPosOffset, 6
+         		mov @rReg, 5
+         	.elseif g_szCommand[2] == 'e' && g_szCommand[3] == 'd' && g_szCommand[4] == 'i'
+         		mov @nextPosOffset, 6
+         		mov @rReg, 6
+         	.elseif g_szCommand[2] == 'e' && g_szCommand[3] == 's' && g_szCommand[4] == 'p'
+         		mov @nextPosOffset, 6
+         		mov @rReg, 7
+         	.elseif g_szCommand[2] == 'e' && g_szCommand[3] == 'b' && g_szCommand[4] == 'p'
+         		mov @nextPosOffset, 6
+         		mov @rReg, 8
+         	.elseif g_szCommand[2] == 'f' && g_szCommand[3] == 's'
+         		mov @nextPosOffset, 5
+         		mov @rReg, 9
+         	.elseif g_szCommand[2] == 'c' && g_szCommand[3] == 's'
+         		mov @nextPosOffset, 5
+         		mov @rReg, 10
+         	.elseif g_szCommand[2] == 'd' && g_szCommand[3] == 's'
+         		mov @nextPosOffset, 5
+         		mov @rReg, 11
+         	.elseif g_szCommand[2] == 'e' && g_szCommand[3] == 's'
+         		mov @nextPosOffset, 5
+         		mov @rReg, 12
+         	.elseif g_szCommand[2] == 's' && g_szCommand[3] == 's'
+         		mov @nextPosOffset, 5
+         		mov @rReg, 13
+         	.elseif g_szCommand[2] == 'e' && g_szCommand[3] == 'i' && g_szCommand[4] == 'p'
+         		mov @nextPosOffset, 6
+         		mov @rReg, 14	
+         	.elseif g_szCommand[2] == 'f' && g_szCommand[3] == 'l' && g_szCommand[4] == 'a' && g_szCommand[4] == 'g'
+         		mov @nextPosOffset, 7
+         		mov @rReg, 15	
+         	.endif
+         	
+         	.if @nextPosOffset > 0
+         		mov ebx, @nextPosOffset
+         		add ebx, offset g_szCommand 
+         		invoke crt_strtoul, ebx, NULL, 16
+         		.if eax == 0 && byte ptr [ebx] != '0'
+            		mov eax, -1
+            	.endif
+        		.if eax == -1
+                	invoke crt_printf, offset g_szCommandErrTip
+                	.continue
+            	.endif
+				mov @dwVal, eax
+         	.endif
+
+            invoke HandlerRCommand, offset g_de, @rReg, @dwVal
          .elseif g_szCommand[0] == 'h'
         	invoke ShowHelper
+        .elseif g_szCommand[0] == 'g' && g_szCommand[1] == 'r'
+        	mov g_dwRunRet, TRUE
+        	invoke SetTCommand,offset g_de, offset g_bIsSingleTStep
+            ret
         .elseif g_szCommand[0] == 'g'
+        	mov g_dwRunRet, FALSE
         	invoke crt_strtoul, offset g_szCommand + 2, NULL, 16
             .if eax != 0 && eax != -1
             	mov g_dwRunEnd, eax

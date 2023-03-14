@@ -15,6 +15,28 @@ include pe_handler.inc
 _splitpath PROTO C :DWORD, :DWORD, :DWORD, :DWORD, :DWORD
 
 
+HasAddr proc uses ecx ebx pAddr:DWORD
+	xor ecx, ecx
+	mov ebx, pAddr
+	.while ecx < 8
+		.if byte ptr [ebx] < 30 || byte ptr [ebx] > 39
+			mov eax, 0
+			ret
+		.endif
+		
+		.if byte ptr [ebx] < 30 && byte ptr [ebx] > 39
+			mov eax, 0
+			ret
+		.endif
+		inc ebx
+		inc ecx
+	.endw
+	
+	mov eax, 1
+	ret
+HasAddr endp
+
+
 IsMemoryNotNull proc uses ecx edx ebx pData:DWORD, dataSize:DWORD
 	mov ebx, pData
 	add ebx, dataSize
@@ -71,7 +93,7 @@ SetContext proc pCtx:ptr CONTEXT, hThread:HANDLE
     ret
 SetContext endp
 
-ReadMemory proc hProc:HANDLE, dwAddr:DWORD, dwSize:DWORD, pBuf:DWORD  
+ReadMemory proc uses ecx hProc:HANDLE, dwAddr:DWORD, dwSize:DWORD, pBuf:DWORD  
 	LOCAL @dwBytesWriteReaded:DWORD
 	LOCAL @dwOldProject:DWORD
 	
@@ -125,7 +147,7 @@ ReadMemoryPartlyFromProcess proc uses esi ecx ebx  hProc:DWORD,dwAddr:DWORD, dwS
     		.if @memBasic.State == MEM_COMMIT
     			mov ebx, pBuf
     			add ebx, @readBytes
-    			invoke ReadMemory, hProc, @addressPart, ebx, @bytesToRead
+    			invoke ReadMemory, hProc, @addressPart, @bytesToRead, ebx
     			.if eax == NULL
     				.break
     			.endif
@@ -133,7 +155,9 @@ ReadMemoryPartlyFromProcess proc uses esi ecx ebx  hProc:DWORD,dwAddr:DWORD, dwS
     		.elseif
     			mov ebx, pBuf
     			add ebx, @readBytes
+    			push ecx
     			invoke RtlZeroMemory, ebx, @bytesToRead
+    			pop ecx
     		.endif
     	
     		mov ecx, @readBytes

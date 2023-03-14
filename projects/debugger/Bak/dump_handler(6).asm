@@ -206,7 +206,7 @@ ReadPeSectionFromProcess proc uses esi ebx readOffset:DWORD, pPeFileSection:DWOR
 	mov ebx, [esi].dataSize
 	invoke crt_calloc, ebx, 1
 	mov [esi].data, eax
-	
+	invoke crt_printf, offset g_szDumpDone
 	invoke ReadMemoryPartlyFromProcess, g_hProc, readOffset, [esi].dataSize, [esi].data
 	ret
 ReadPeSectionFromProcess endp

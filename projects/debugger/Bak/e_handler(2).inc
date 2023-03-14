@@ -1,0 +1,1 @@
+HandlerECommand proto uses ecx ebx edx hProc:HANDLE, dwAddr:DWORD

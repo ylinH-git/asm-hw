@@ -1,0 +1,1 @@
+HandlerECommand proto  hProc:HANDLE, dwAddr:DWORD, pStr:DWORD

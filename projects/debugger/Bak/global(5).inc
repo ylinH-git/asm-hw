@@ -5,7 +5,6 @@ include Comctl32.inc
 include shell32.inc
 include msvcrt.inc
 include psapi.inc
-include ntdll.inc
 
 includelib kernel32.lib
 includelib user32.lib
@@ -13,7 +12,6 @@ includelib Comctl32.lib
 includelib shell32.lib
 includelib msvcrt.lib
 includelib psapi.lib
-includelib ntdll.lib
 
 
 ACCESS_READ_EXCEPT equ 0 

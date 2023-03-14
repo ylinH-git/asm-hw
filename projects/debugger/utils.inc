@@ -25,3 +25,5 @@ SplitPath proto pFilePath:DWORD
 GetFileName proto
 
 GetFileExt proto
+
+HasAddr proto pAddr:DWORD

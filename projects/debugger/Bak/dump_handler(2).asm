@@ -263,7 +263,7 @@ ReadSectionFrom proc uses esi ecx edx readOffset:DWORD, pPeFileSection:DWORD
 	sub eax, @currentReadSize
 	mov @currentOffset, eax
 	
-	mov ecx, @currentReadSize
+	mov ecx, @currentOffset
 	.while ecx >= readOffset
 		push ecx
 		invoke RtlZeroMemory, @pData, @currentReadSize

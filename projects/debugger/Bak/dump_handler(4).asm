@@ -219,7 +219,7 @@ ReadSectionFrom proc uses esi ecx edx readOffset:DWORD, pPeFileSection:DWORD
 	LOCAL @currentOffset:DWORD
 	
 
-	mov @maxReadSize, 100
+	mov @maxReadSize, 100h
 	
 	invoke crt_calloc, @maxReadSize, 1
 	mov  @pData, eax

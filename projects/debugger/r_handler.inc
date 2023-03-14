@@ -1,1 +1,1 @@
-HandlerRCommand proto pDe:DWORD
+HandlerRCommand proto pDe:DWORD, dwReg:DWORD, dwVal:DWORD

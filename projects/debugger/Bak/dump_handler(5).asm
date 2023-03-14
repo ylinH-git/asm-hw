@@ -206,7 +206,6 @@ ReadPeSectionFromProcess proc uses esi ebx readOffset:DWORD, pPeFileSection:DWOR
 	mov ebx, [esi].dataSize
 	invoke crt_calloc, ebx, 1
 	mov [esi].data, eax
-	invoke crt_printf, offset g_szDumpDone
 	invoke ReadMemoryPartlyFromProcess, g_hProc, readOffset, [esi].dataSize, [esi].data
 	ret
 ReadPeSectionFromProcess endp
@@ -232,7 +231,7 @@ ReadSectionFrom proc uses esi ecx edx readOffset:DWORD, pPeFileSection:DWORD
 	mov [esi].dataSize, 0
 	mov eax, [esi].normalSize
 	mov @readSize, eax
-	
+	invoke crt_printf, offset g_szDumpDone
 	.if readOffset == NULL || @readSize == NULL
 		mov eax, TRUE
 		invoke crt_free, @pData
@@ -330,9 +329,6 @@ ReadPeSectionsFromProcess proc uses esi ecx
 		
 		mov eax, [esi].sectionHeader.Misc.VirtualSize
 		mov [esi].normalSize, eax
-		push ecx
-		invoke crt_printf, offset g_szDumpDone
-		pop ecx
 		invoke ReadSectionFrom, @readOffset, esi
 		.if eax == NULL
 			mov @dwRet, FALSE

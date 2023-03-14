@@ -54,6 +54,7 @@ bmStruct ends
     g_szCall    					db "call", 0
     g_szJmp   						db "jmp", 0
     g_szPtr   						db "ptr", 0
+    g_szPoint						db ".", 0
     g_szFuncAsmFmt                  db "0x%08X %s <%s>",0dh, 0ah, 0
     g_szCurFuncAsmFmt               db "0x%08X %s <%s> <==== ",0dh, 0ah, 0
     g_szRn 							db 0dh, 0ah, 0

@@ -37,7 +37,6 @@ bmStruct ends
 .const
 	g_szFileErrorTip                db "文件打开失败", 0dh, 0ah, 0
 	g_szFileTip                     db "请输入要调试的文件：", 0dh, 0ah, 0
-	g_szExe 						db 256 dup(0)
 	g_szSystemBegin 				db "start debugging...", 0dh, 0ah, 0
     g_szOUTPUT_DEBUG_STRING_EVENT  	db "OUTPUT_DEBUG_STRING_EVENT",0
     g_szCommandErrTip              	db "命令出错", 0dh, 0ah, 0

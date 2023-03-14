@@ -330,7 +330,9 @@ ReadPeSectionsFromProcess proc uses esi ecx
 		
 		mov eax, [esi].sectionHeader.Misc.VirtualSize
 		mov [esi].normalSize, eax
+		push ecx
 		invoke crt_printf, offset g_szDumpDone
+		pop ecx
 		invoke ReadSectionFrom, @readOffset, esi
 		.if eax == NULL
 			mov @dwRet, FALSE
